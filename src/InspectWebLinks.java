@@ -59,7 +59,6 @@ public class InspectWebLinks {
 
 
     private static int check_link(String url) {
-
         Pattern p = Pattern.compile(".*\\.pdf");
         Matcher m = p.matcher(url);
         if(m.find()) {
@@ -97,7 +96,6 @@ public class InspectWebLinks {
         return !m.find() && !m2.find() && !m3.find() && !m4.find();
     }
 
-    private static Set<String> get_links_on_page(String url) throws IOException {
     private static HashMap<String,String> get_links_on_page(String url) throws IOException {
         Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
         Elements links = doc.select("a");
@@ -140,7 +138,6 @@ public class InspectWebLinks {
             }
 
         }
-        return found_urls;
         */
 
         return found_url;
@@ -160,8 +157,6 @@ public class InspectWebLinks {
             cpt++;
             while (!to_visit.isEmpty()) {
                 String current_link = to_visit.pop();
-
-                if (!visited.contains(current_link) && current_link.startsWith(start_url) && verifLink(current_link)) {
                 if (!visited.contains(current_link) && current_link.startsWith(start_url)) {
                     System.out.print(".");
                     System.out.println(current_link);
@@ -169,22 +164,18 @@ public class InspectWebLinks {
                     visited.add(current_link);
                     if (response == 1) {
                         validLinks += 1;
-                        Set<String> found_links = get_links_on_page(current_link);
-                        for (String new_link : found_links) {
                         HashMap<String,String> found_links = get_links_on_page(current_link);
                         for (String new_link : found_links.keySet()) {
                             if (!visited.contains(new_link)) {
-                                if (!new_link.startsWith(start_url)) {
-                                    int x = check_link(new_link);
-                                    System.out.println(new_link);
-                                    visited.add(new_link);
-                                    if (x == 0) {
-                                        brokenLinks += 1;
-                                        reportData += "\n Url is broken " + new_link + " sur la page " + current_link;
-                                        System.out.println("\n Url is broken " + new_link);
-                                    } else {
-                                        validLinks += 1;
-                                    }
+                                int x = check_link(new_link);
+                                System.out.println(new_link);
+                                visited.add(new_link);
+                                if (x == 0) {
+                                    brokenLinks += 1;
+                                    reportData += "\n Le site renvoie un message d'erreur " + new_link + " sur la page " + found_links.get(new_link);
+                                    System.out.println("\n Url is broken " + new_link+ " sur la page " + found_links.get(new_link));
+                                } else {
+                                    validLinks += 1;
                                 }
 
                                 if (verifLink(new_link)) {
@@ -195,8 +186,6 @@ public class InspectWebLinks {
                         }
                     } else if (response == 0) {
                         brokenLinks += 1;
-                        System.out.println("\n Url is broken " + current_link);
-                        reportData += "\n Url is broken " + current_link;
                         System.out.println("\n La page UOH " + current_link + " est down");
                         reportData += "\n La page UOH " + current_link + " est down";
                     }
@@ -210,7 +199,6 @@ public class InspectWebLinks {
                 } else {
                     skippedLinks += 1;
                     //System.out.println("\n Url skipped " + current_link);
-
                 }
             }
             System.out.format("Finished! (%2d empty) (%2d skipped) (%2d broken) (%2d valid)", emptyLinks, skippedLinks, brokenLinks, validLinks);
