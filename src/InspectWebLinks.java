@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -44,7 +46,6 @@ public class InspectWebLinks {
         Response response;
         try {
             response = Jsoup.connect(url).execute();
-            System.out.println(response.statusCode() + "   " + url);
             if(response.statusCode() == 404) {
                 return 0;
             }
@@ -64,7 +65,9 @@ public class InspectWebLinks {
         Set<String> found_urls = new HashSet<String>();
 
         for (Element link: links) {
+            System.out.println(link.toString());
             String sub_url = link.attr("abs:href");
+            System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"+sub_url);
 
             if (sub_url == null || sub_url.isEmpty()) {
                 //System.out.println("\n Url is empty " + link.outerHtml() + " at " + url);
@@ -80,17 +83,19 @@ public class InspectWebLinks {
     }
 
     private static void inspect(String start_url) throws IOException {
-
+        Pattern p = Pattern.compile("uoh\\.fr/front/resultatsfr/.*query=") ;
+        Pattern p2 = Pattern.compile("uoh\\.fr/front/resultatsfr/\\?query=.*") ;
         Set<String> visited = new HashSet<String>();
         Stack<String> to_visit = new Stack<String>();
         to_visit.push(start_url);
-        start_url = "https://uoh.fr/";
         int cpt = 0 ;
 
         while (!to_visit.isEmpty() && cpt<100) {
 
             String current_link = to_visit.pop();
-            if (!visited.contains(current_link) && current_link.startsWith(start_url)) {
+            Matcher m = p.matcher(current_link);
+            Matcher m2 = p2.matcher(current_link);
+            if (!visited.contains(current_link) && current_link.startsWith(start_url) && !m.find() && !m2.find()) {
                 System.out.print(".");
                 System.out.println(current_link);
                 int response = check_link(current_link);
@@ -103,7 +108,7 @@ public class InspectWebLinks {
                         if (!visited.contains(new_link)) {
                             if(!new_link.startsWith(start_url)) {
                                 int x = check_link(new_link);
-                                System.out.println(x);
+                                System.out.println(new_link);
                                 visited.add(new_link);
                                 if(x==0) {
                                     brokenLinks+=1;
@@ -114,7 +119,9 @@ public class InspectWebLinks {
                                     validLinks+=1;
                                 }
                             }
-                            to_visit.push(new_link);
+                            if(!m.find() || !m2.find()) {
+                                to_visit.push(new_link);
+                            }
                         }
                     }
                 } else if (response == 0) {
