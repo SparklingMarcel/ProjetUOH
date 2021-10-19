@@ -76,6 +76,10 @@ public class InspectWebLinks {
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
+            if(e.getMessage().equals("received handshake warning: unrecognized_name")) {
+                return 2;
+            }
+
             return 0;
         }
     }
@@ -94,6 +98,7 @@ public class InspectWebLinks {
     }
 
     private static Set<String> get_links_on_page(String url) throws IOException {
+    private static HashMap<String,String> get_links_on_page(String url) throws IOException {
         Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
         Elements links = doc.select("a");
         Elements links2 = doc.select("div.carte-notice-liens-footer");
