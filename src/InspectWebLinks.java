@@ -12,16 +12,17 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class InspectWebLinks {
-
+    static String start_url = "https://uoh.fr/front/resultatsfr/";
     static int validLinks = 0;
     static int brokenLinks = 0;
     static int emptyLinks = 0;
     static int skippedLinks = 0;
     static String reportData = "";
+    private static int nbPage = 0 ;
 
     public static void main(String[] args) throws IOException {
-
-        inspect("https://uoh.fr/front/resultatsfr/");
+        getNbPage();
+        inspect();
         generate_report(reportData,"C:\\Users\\Etu\\Desktop\\javaDeadLink\\report.txt");
 
     }
@@ -32,6 +33,23 @@ public class InspectWebLinks {
         FileWriter report = new FileWriter(reportPath);
         report.write(reportData);
         report.close();
+
+    }
+
+    private static void getNbPage() throws  IOException {
+        Document doc = Jsoup.connect(start_url).userAgent("Mozilla").get();
+        Elements nbRes = doc.select("span");
+
+        for (Element l : nbRes) {
+
+            Pattern p = Pattern.compile("<span class=\"nb-resultats\">");
+            Matcher m = p.matcher(l.toString());
+            if(m.find()) {
+                String afterSpan = l.toString().split(">")[1];
+                nbPage =  (Integer.parseInt(afterSpan.split(" ")[0])/9)+1;
+                return ;
+            }
+        }
 
     }
 
@@ -57,6 +75,19 @@ public class InspectWebLinks {
         }
     }
 
+    private static boolean verifLink(String current_link) {
+        Pattern p = Pattern.compile("uoh\\.fr/front/resultatsfr/.*query=");
+        Pattern p2 = Pattern.compile("uoh\\.fr/front/resultatsfr/\\?query=.*");
+        Pattern estamp = Pattern.compile("uoh\\.fr/front/resultatsfr/#.*");
+        Pattern estamp2 = Pattern.compile("uoh\\.fr/front/resultatsfr/.*#");
+        Matcher m = p.matcher(current_link);
+        Matcher m2 = p2.matcher(current_link);
+        Matcher m3 = estamp.matcher(current_link);
+        Matcher m4 = estamp2.matcher(current_link);
+
+        return !m.find() && !m2.find() && !m3.find() && !m4.find();
+    }
+
     private static Set<String> get_links_on_page(String url) throws IOException {
         Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
         Elements links = doc.select("a");
@@ -65,7 +96,10 @@ public class InspectWebLinks {
 
         for (Element link: links) {
             String sub_url = link.attr("abs:href");
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
             if (sub_url == null || sub_url.isEmpty()) {
                 //System.out.println("\n Url is empty " + link.outerHtml() + " at " + url);
 
@@ -79,11 +113,16 @@ public class InspectWebLinks {
         return found_urls;
     }
 
+<<<<<<< Updated upstream
     private static void inspect(String start_url) throws IOException {
+=======
+    private static void inspect() throws IOException {
+>>>>>>> Stashed changes
 
         Set<String> visited = new HashSet<String>();
         Stack<String> to_visit = new Stack<String>();
         to_visit.push(start_url);
+<<<<<<< Updated upstream
         start_url = "https://uoh.fr/";
         int cpt = 0 ;
 
@@ -109,29 +148,62 @@ public class InspectWebLinks {
                                     brokenLinks+=1;
                                     reportData += "\n Url is broken " + new_link + " sur la page "+current_link;
                                     System.out.println("\n Url is broken " + new_link);
+=======
+        int cpt = 0;
+        while (cpt <= nbPage) {
+            to_visit.push(start_url+"?query&pagination="+cpt+"&sort=score");
+            System.out.println(start_url+"?query&pagination"+cpt+"&sort=score\"");
+            cpt++;
+            while (!to_visit.isEmpty()) {
+                String current_link = to_visit.pop();
+
+                if (!visited.contains(current_link) && current_link.startsWith(start_url) && verifLink(current_link)) {
+                    System.out.print(".");
+                    System.out.println(current_link);
+                    int response = check_link(current_link);
+                    visited.add(current_link);
+                    if (response == 1) {
+                        validLinks += 1;
+                        Set<String> found_links = get_links_on_page(current_link);
+                        for (String new_link : found_links) {
+                            if (!visited.contains(new_link)) {
+                                if (!new_link.startsWith(start_url)) {
+                                    int x = check_link(new_link);
+                                    System.out.println(new_link);
+                                    visited.add(new_link);
+                                    if (x == 0) {
+                                        brokenLinks += 1;
+                                        reportData += "\n Url is broken " + new_link + " sur la page " + current_link;
+                                        System.out.println("\n Url is broken " + new_link);
+                                    } else {
+                                        validLinks += 1;
+                                    }
+>>>>>>> Stashed changes
                                 }
-                                else{
-                                    validLinks+=1;
+                                if (verifLink(new_link)) {
+                                    to_visit.push(new_link);
                                 }
                             }
+<<<<<<< Updated upstream
                             to_visit.push(new_link);
+=======
+>>>>>>> Stashed changes
                         }
+                    } else if (response == 0) {
+                        brokenLinks += 1;
+                        System.out.println("\n Url is broken " + current_link);
+                        reportData += "\n Url is broken " + current_link;
                     }
-                } else if (response == 0) {
-                    brokenLinks += 1;
-                    System.out.println("\n Url is broken " + current_link);
-                    reportData += "\n Url is broken " + current_link;
-                }
-                System.out.println(validLinks+"ValidLinks");
-                System.out.println(brokenLinks+"brokenLinks");
-            }
-            else {
-                skippedLinks += 1;
-                //System.out.println("\n Url skipped " + current_link);
+                    System.out.println(validLinks + "ValidLinks");
+                    System.out.println(brokenLinks + "brokenLinks");
+                } else {
+                    skippedLinks += 1;
+                    //System.out.println("\n Url skipped " + current_link);
 
+                }
             }
+            System.out.format("Finished! (%2d empty) (%2d skipped) (%2d broken) (%2d valid)", emptyLinks, skippedLinks, brokenLinks, validLinks);
         }
-        System.out.format("Finished! (%2d empty) (%2d skipped) (%2d broken) (%2d valid)", emptyLinks, skippedLinks, brokenLinks, validLinks);
     }
 
 
