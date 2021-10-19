@@ -1,6 +1,8 @@
 package src ;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,27 +23,47 @@ public class InspectWebLinks {
     static int emptyLinks = 0;
     static int skippedLinks = 0;
     static int certifLinks = 0 ;
+    static FileWriter f ;
     static String reportData = "";
     private static int nbPage = 0 ;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        try {
+            f = new FileWriter("C:\\Users\\Etu\\Desktop\\javaDeadLink\\report.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         getNbPage();
-        inspect();
-        generate_report(reportData,"C:\\Users\\Etu\\Desktop\\javaDeadLink\\report.txt");
-
+        try {
+            inspect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                f.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
-    private static void generate_report(String reportData, String reportPath) throws IOException {
 
-        FileWriter report = new FileWriter(reportPath);
-        report.write(reportData);
-        report.close();
 
-    }
-
-    private static void getNbPage() throws  IOException {
-        Document doc = Jsoup.connect(start_url).userAgent("Mozilla").get();
+    private static void getNbPage()  {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(start_url).userAgent("Mozilla").get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
         Elements nbRes = doc.select("span");
 
         for (Element l : nbRes) {
@@ -59,10 +81,10 @@ public class InspectWebLinks {
 
 
     private static int check_link(String url) {
-        Pattern p = Pattern.compile(".*\\.pdf");
+        Pattern p = Pattern.compile(".*\\.pdf$|.*\\.PDF$");
         Matcher m = p.matcher(url);
         if(m.find()) {
-            return 1;
+            return 2;
         }
         Response response;
         try {
@@ -75,7 +97,9 @@ public class InspectWebLinks {
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
-            if(e.getMessage().equals("received handshake warning: unrecognized_name")) {
+            if(e.getMessage().equals("received handshake warning: unrecognized_name") || e.getMessage().equals(
+                    "PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested"
+            )) {
                 return 2;
             }
 
@@ -96,50 +120,40 @@ public class InspectWebLinks {
         return !m.find() && !m2.find() && !m3.find() && !m4.find();
     }
 
-    private static HashMap<String,String> get_links_on_page(String url) throws IOException {
-        Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
+    private static HashMap<String,String> get_links_on_page(String url)  {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(url).userAgent("Mozilla").get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
         Elements links = doc.select("a");
         Elements links2 = doc.select("div.carte-notice-liens-footer");
         Pattern p = Pattern.compile("href=\".*?>");
         HashMap<String,String> found_url = new HashMap<String,String>();
+        String s1 = "" ;
+        String s2 = "" ;
         int cpt = 0 ;
         for(Element link2 : links2) {
             Matcher m = p.matcher(link2.toString());
             if(m.find()) {
-                String s1 = m.group().subSequence(6, m.group().length()-2).toString();
+                s1 = m.group().subSequence(6, m.group().length()-2).toString();
                 if(s1.charAt(0)!='h') {
                     s1="http://"+s1;
                 }
                 if(m.find()){
-                    String s2 = m.group().subSequence(6, m.group().length()-2).toString();
+                    s2 = m.group().subSequence(6, m.group().length()-2).toString();
                     if(s2.charAt(0)!='h') {
                         s2= "http://"+s2;
                     }
-                    found_url.put(s1,s2);
+                    s2 =s2.replace("?lang=fr&amp;","/?");
+
                 }
-
-
+                found_url.put(s1,s2);
             }
 
         }
-        /*
-        Set<String> found_urls = new HashSet<String>();
-
-        for (Element link: links) {
-            String sub_url = link.attr("abs:href");
-
-            if (sub_url == null || sub_url.isEmpty()) {
-                //System.out.println("\n Url is empty " + link.outerHtml() + " at " + url);
-
-                emptyLinks += 1;
-            }
-            else {
-                found_urls.add(sub_url);
-            }
-
-        }
-        */
-
         return found_url;
     }
 
@@ -171,11 +185,17 @@ public class InspectWebLinks {
                                 System.out.println(new_link);
                                 visited.add(new_link);
                                 if (x == 0) {
+                                    String fd = found_links.get(new_link);
                                     brokenLinks += 1;
-                                    reportData += "\n Le site renvoie un message d'erreur " + new_link + " sur la page " + found_links.get(new_link);
-                                    System.out.println("\n Url is broken " + new_link+ " sur la page " + found_links.get(new_link));
-                                } else {
-                                    validLinks += 1;
+                                    f.write("\n Le site renvoie un message d'erreur " + new_link + " sur la page " + fd+"\n");
+                                    System.out.println("\n Url is broken " + new_link+ " sur la page " + fd);
+                                } else if (x == 2)  {
+                                    certifLinks+=1;
+                                    System.out.println("certificat invalide");
+                                    f.write("\n le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier "+current_link+"\n");
+                                }
+                                else {
+                                    validLinks++;
                                 }
 
                                 if (verifLink(new_link)) {
@@ -187,12 +207,12 @@ public class InspectWebLinks {
                     } else if (response == 0) {
                         brokenLinks += 1;
                         System.out.println("\n La page UOH " + current_link + " est down");
-                        reportData += "\n La page UOH " + current_link + " est down";
+                        f.write("\n La page UOH " + current_link + " est down"+"\n");
                     }
                       else if (response == 2)  {
                           certifLinks+=1;
                           System.out.println("certificat invalide");
-                          reportData += "\n le certificat du site n'est pas valide, il faut vérifier le site manuellement"+current_link;
+                          f.write("\n le certificat du site n'est pas valide, il faut vérifier le site manuellement ou alors il s'agit d'un PDF à verifier"+current_link+"\n");
                     }
                     System.out.println(validLinks + "ValidLinks");
                     System.out.println(brokenLinks + "brokenLinks");
