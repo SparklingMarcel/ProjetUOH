@@ -1,6 +1,7 @@
 package src ;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -19,6 +20,7 @@ public class InspectWebLinks {
     static int brokenLinks = 0;
     static int emptyLinks = 0;
     static int skippedLinks = 0;
+    static int certifLinks = 0 ;
     static String reportData = "";
     private static int nbPage = 0 ;
 
@@ -58,6 +60,11 @@ public class InspectWebLinks {
 
     private static int check_link(String url) {
 
+        Pattern p = Pattern.compile(".*\\.pdf");
+        Matcher m = p.matcher(url);
+        if(m.find()) {
+            return 1;
+        }
         Response response;
         try {
             response = Jsoup.connect(url).execute();
@@ -89,7 +96,30 @@ public class InspectWebLinks {
     private static Set<String> get_links_on_page(String url) throws IOException {
         Document doc = Jsoup.connect(url).userAgent("Mozilla").get();
         Elements links = doc.select("a");
+        Elements links2 = doc.select("div.carte-notice-liens-footer");
+        Pattern p = Pattern.compile("href=\".*?>");
+        HashMap<String,String> found_url = new HashMap<String,String>();
+        int cpt = 0 ;
+        for(Element link2 : links2) {
+            Matcher m = p.matcher(link2.toString());
+            if(m.find()) {
+                String s1 = m.group().subSequence(6, m.group().length()-2).toString();
+                if(s1.charAt(0)!='h') {
+                    s1="http://"+s1;
+                }
+                if(m.find()){
+                    String s2 = m.group().subSequence(6, m.group().length()-2).toString();
+                    if(s2.charAt(0)!='h') {
+                        s2= "http://"+s2;
+                    }
+                    found_url.put(s1,s2);
+                }
 
+
+            }
+
+        }
+        /*
         Set<String> found_urls = new HashSet<String>();
 
         for (Element link: links) {
@@ -106,6 +136,9 @@ public class InspectWebLinks {
 
         }
         return found_urls;
+        */
+
+        return found_url;
     }
 
 
@@ -118,11 +151,13 @@ public class InspectWebLinks {
         while (cpt <= nbPage) {
             to_visit.push(start_url+"?query&pagination="+cpt+"&sort=score");
             System.out.println(start_url+"?query&pagination"+cpt+"&sort=score\"");
+            System.out.println("-------------------------------------------------");
             cpt++;
             while (!to_visit.isEmpty()) {
                 String current_link = to_visit.pop();
 
                 if (!visited.contains(current_link) && current_link.startsWith(start_url) && verifLink(current_link)) {
+                if (!visited.contains(current_link) && current_link.startsWith(start_url)) {
                     System.out.print(".");
                     System.out.println(current_link);
                     int response = check_link(current_link);
@@ -131,6 +166,8 @@ public class InspectWebLinks {
                         validLinks += 1;
                         Set<String> found_links = get_links_on_page(current_link);
                         for (String new_link : found_links) {
+                        HashMap<String,String> found_links = get_links_on_page(current_link);
+                        for (String new_link : found_links.keySet()) {
                             if (!visited.contains(new_link)) {
                                 if (!new_link.startsWith(start_url)) {
                                     int x = check_link(new_link);
@@ -144,6 +181,7 @@ public class InspectWebLinks {
                                         validLinks += 1;
                                     }
                                 }
+
                                 if (verifLink(new_link)) {
                                     to_visit.push(new_link);
                                 }
@@ -154,6 +192,13 @@ public class InspectWebLinks {
                         brokenLinks += 1;
                         System.out.println("\n Url is broken " + current_link);
                         reportData += "\n Url is broken " + current_link;
+                        System.out.println("\n La page UOH " + current_link + " est down");
+                        reportData += "\n La page UOH " + current_link + " est down";
+                    }
+                      else if (response == 2)  {
+                          certifLinks+=1;
+                          System.out.println("certificat invalide");
+                          reportData += "\n le certificat du site n'est pas valide, il faut vérifier le site manuellement"+current_link;
                     }
                     System.out.println(validLinks + "ValidLinks");
                     System.out.println(brokenLinks + "brokenLinks");
