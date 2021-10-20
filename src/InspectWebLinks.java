@@ -30,11 +30,12 @@ public class InspectWebLinks {
 
     public static void main(String[] args) {
         try {
-            /*
-            String path = System.getProperty("user.home") + File.separator + "Documents" ;
+
+            String path = System.getProperty("user.home") + File.separator + "report.txt" ;
+            System.out.println(path);
             f = new FileWriter(path);
-             */
-            f = new FileWriter("C:\\Users\\Etu\\Desktop\\javaDeadLink\\report.txt");
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
