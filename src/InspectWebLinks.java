@@ -26,7 +26,7 @@ public class InspectWebLinks {
     static FileWriter f;
     private static int nbPage = 0;
 
-    public static void main(String[] args) {
+    public static void main() {
         try {
 
             String path = System.getProperty("user.dir") + File.separator + "report.txt";
