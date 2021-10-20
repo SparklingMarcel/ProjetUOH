@@ -85,7 +85,7 @@ public class InspectWebLinks {
     /**
      * check_link vérifie si un lien est mort ou non
      *
-     * @param url lien a vérifier
+     * @param url lien à vérifier
      * @return 0 ( lien mort ) ou 0 (lien non mort)
      */
     private static int check_link(String url) {
@@ -115,11 +115,11 @@ public class InspectWebLinks {
     }
 
     /**
-     * verifLink verifie si le lien doit etre analyser ou non
+     * verifLink verifie si le lien doit être analysé ou non
      *
      * @param current_link lien à vérifier
-     * @return true si le lien est valide est doit etre analyser et false si le lien contient
-     * un des pattern et ne doit pas être analyser
+     * @return true si le lien est valide et doit être analysé et false si le lien contient
+     * un des pattern et ne doit pas être analysé
      */
     private static boolean verifLink(String current_link) {
         Pattern p = Pattern.compile("uoh\\.fr/front/resultatsfr/.*query=");
@@ -135,10 +135,10 @@ public class InspectWebLinks {
     }
 
     /**
-     * get_links_on_page récupère tout les liens présent sur une page
+     * get_links_on_page récupère tous les liens présents sur une page
      *
-     * @param url url de la page où ont récupère les liens
-     * @return un hashMap contenant le lien de la ressource externe associé au lien de la notice
+     * @param url url de la page où on récupère les liens
+     * @return un hashMap contenant le lien de la ressource externe associée au lien de la notice
      */
     private static HashMap<String, String> get_links_on_page(String url) {
         Document doc = null;
