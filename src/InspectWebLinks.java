@@ -31,7 +31,7 @@ public class InspectWebLinks {
     public static void main(String[] args) {
         try {
 
-            String path = System.getProperty("user.home") + File.separator + "report.txt" ;
+            String path = System.getProperty("user.dir") + File.separator + "report.txt" ;
             System.out.println(path);
             f = new FileWriter(path);
 
