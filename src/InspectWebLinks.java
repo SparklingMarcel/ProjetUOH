@@ -24,13 +24,12 @@ public class InspectWebLinks {
     static int skippedLinks = 0;
     static int certifLinks = 0;
     static FileWriter f;
-    static String reportData = "";
     private static int nbPage = 0;
 
     public static void main(String[] args) {
         try {
 
-            String path = System.getProperty("user.dir") + File.separator + "report.txt" ;
+            String path = System.getProperty("user.dir") + File.separator + "report.txt";
             System.out.println(path);
             f = new FileWriter(path);
 
@@ -85,6 +84,7 @@ public class InspectWebLinks {
 
     /**
      * check_link vérifie si un lien est mort ou non
+     *
      * @param url lien a vérifier
      * @return 0 ( lien mort ) ou 0 (lien non mort)
      */
@@ -116,6 +116,7 @@ public class InspectWebLinks {
 
     /**
      * verifLink verifie si le lien doit etre analyser ou non
+     *
      * @param current_link lien à vérifier
      * @return true si le lien est valide est doit etre analyser et false si le lien contient
      * un des pattern et ne doit pas être analyser
@@ -135,6 +136,7 @@ public class InspectWebLinks {
 
     /**
      * get_links_on_page récupère tout les liens présent sur une page
+     *
      * @param url url de la page où ont récupère les liens
      * @return un hashMap contenant le lien de la ressource externe associé au lien de la notice
      */
@@ -146,13 +148,10 @@ public class InspectWebLinks {
             e.printStackTrace();
         }
         assert doc != null;
-        Elements links = doc.select("a");
         Elements links2 = doc.select("div.carte-notice-liens-footer");
         Pattern p = Pattern.compile("href=\".*?>");
-        HashMap<String, String> found_url = new HashMap<String, String>();
-        String s1 = "";
-        String s2 = "";
-        int cpt = 0;
+        HashMap<String, String> found_url = new HashMap<>();
+        String s1, s2 = "";
         for (Element link2 : links2) {
             Matcher m = p.matcher(link2.toString());
             if (m.find()) {
@@ -177,12 +176,13 @@ public class InspectWebLinks {
 
     /**
      * inspect
+     *
      * @throws IOException
      */
     private static void inspect() throws IOException {
 
-        Set<String> visited = new HashSet<String>();
-        Stack<String> to_visit = new Stack<String>();
+        Set<String> visited = new HashSet<>();
+        Stack<String> to_visit = new Stack<>();
         to_visit.push(start_url);
         int cpt = 0;
         while (cpt <= nbPage) {
