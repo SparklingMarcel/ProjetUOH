@@ -57,7 +57,9 @@ public class InspectWebLinks {
         }
     }
 
-
+    /**
+     * getNbPage récupère le nombre de page à analyser sur le site
+     */
     private static void getNbPage() {
         Document doc = null;
         try {
@@ -81,7 +83,11 @@ public class InspectWebLinks {
 
     }
 
-
+    /**
+     * check_link vérifie si un lien est mort ou non
+     * @param url lien a vérifier
+     * @return 0 ( lien mort ) ou 0 (lien non mort)
+     */
     private static int check_link(String url) {
         Pattern p = Pattern.compile(".*\\.pdf$|.*\\.PDF$");
         Matcher m = p.matcher(url);
@@ -108,6 +114,12 @@ public class InspectWebLinks {
         }
     }
 
+    /**
+     * verifLink verifie si le lien doit etre analyser ou non
+     * @param current_link lien à vérifier
+     * @return true si le lien est valide est doit etre analyser et false si le lien contient
+     * un des pattern et ne doit pas être analyser
+     */
     private static boolean verifLink(String current_link) {
         Pattern p = Pattern.compile("uoh\\.fr/front/resultatsfr/.*query=");
         Pattern p2 = Pattern.compile("uoh\\.fr/front/resultatsfr/\\?query=.*");
@@ -121,6 +133,11 @@ public class InspectWebLinks {
         return !m.find() && !m2.find() && !m3.find() && !m4.find();
     }
 
+    /**
+     * get_links_on_page récupère tout les liens présent sur une page
+     * @param url url de la page où ont récupère les liens
+     * @return un hashMap contenant le lien de la ressource externe associé au lien de la notice
+     */
     private static HashMap<String, String> get_links_on_page(String url) {
         Document doc = null;
         try {
@@ -158,7 +175,10 @@ public class InspectWebLinks {
         return found_url;
     }
 
-
+    /**
+     * inspect
+     * @throws IOException
+     */
     private static void inspect() throws IOException {
 
         Set<String> visited = new HashSet<String>();
