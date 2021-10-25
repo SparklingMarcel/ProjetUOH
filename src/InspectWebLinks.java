@@ -54,6 +54,8 @@ public class InspectWebLinks {
             e.printStackTrace();
         }
         assert doc != null;
+        Elements links2 = doc.select("div.carte-notice-liens-footer");
+
         Elements nbRes = doc.select("span");
 
         for (Element l : nbRes) {
@@ -62,7 +64,7 @@ public class InspectWebLinks {
             Matcher m = p.matcher(l.toString());
             if (m.find()) {
                 String afterSpan = l.toString().split(">")[1];
-                nbPage = (Integer.parseInt(afterSpan.split(" ")[0]) / 9) + 1;
+                nbPage = (Integer.parseInt(afterSpan.split(" ")[0]) / links2.size()) + 1;
                 return;
             }
         }
