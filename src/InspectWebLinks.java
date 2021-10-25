@@ -1,15 +1,17 @@
 package src;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -19,27 +21,31 @@ import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
+import javafx.scene.Group;
+import javafx.scene.SubScene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+
+import static java.nio.file.Files.newBufferedWriter;
+import static java.util.stream.Collectors.joining;
 import static src.UOHinterface.*;
 
 public class InspectWebLinks {
+    static String path = System.getProperty("user.dir") + File.separator + "report.txt";
+    static String pathCsv = System.getProperty("user.dir") + File.separator + "report.csv" ;
     static String start_url = "https://uoh.fr/front/resultatsfr/";
-    static int validLinks = 0;
     static int brokenLinks = 0;
-    static int emptyLinks = 0;
-    static int skippedLinks = 0;
     static int certifLinks = 0;
+    static boolean rap = false ;
     static FileWriter f;
     private static int nbPage = 0;
 
@@ -47,22 +53,46 @@ public class InspectWebLinks {
         launch();
     }
 
+    public static void writeRapport() {
+
+        try {
+            rap = true ;
+            RadioButton s = (RadioButton)root.lookup("#texte");
+            f.close();
+            if(s.isSelected()) {
+                return ;
+            }
+            else {
+                BufferedReader bf = new BufferedReader(new FileReader(path));
+                FileWriter bo = new FileWriter(pathCsv);
+                String su = "";
+                while( (su=bf.readLine())!=null){
+                    System.out.println(su);
+                    bo.write(su);
+                }
+                bo.close();
+                bf.close();
+                new File(path).delete();
+
+                }
+
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
     public static void launch() {
         try {
-            String path = System.getProperty("user.dir") + File.separator + "report.txt";
             System.out.println(path);
             f = new FileWriter(path);
             getNbPage();
             inspect();
-            f.close();
+
+
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                f.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -177,7 +207,7 @@ public class InspectWebLinks {
                     @Override
                     protected Void call() {
                         String current_link = start_url;
-                        int cpt = 0;
+                        int cpt = 220;
                         while (cpt <= nbPage) {
                             cpt++;
                             System.out.println(current_link);
@@ -186,7 +216,7 @@ public class InspectWebLinks {
                             for (String new_link : found_links.keySet()) {
                                 System.out.println(new_link);
                                 int x = check_link(new_link);
-                                try {
+
                                     String fd = found_links.get(new_link);
                                     if (fd.equals("")) {
                                         fd = current_link;
@@ -197,20 +227,34 @@ public class InspectWebLinks {
                                         String txt2 = " Le site renvoie un message d'erreur " + new_link + " sur la page " + fd;
                                         System.out.println("-------------------------------");
                                         addNode(new_link,fd,true);
-                                        f.write("\n"+ txt2 +"\n");
+                                        try {
+                                            f.write("\n"+ txt2 +"\n");
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        System.out.println("test");
+
                                     } else if (x == 2) {
                                         certifLinks += 1;
                                         String txt = "le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier ";
                                         System.out.println("certificat invalide");
+                                        try {
+                                            f.write("\n"+txt+" "+ new_link+"\n");
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        System.out.println("test");
                                         addNode(new_link,fd,false);
-                                        f.write("\n"+txt+" "+ new_link+"\n");
+
+
+
                                     }
-                                } catch (IOException e) {
-                                }
+
                             }
                             current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
                         }
-
+                        Button b = (Button) root.lookup("#rapport");
+                        b.setDisable(false);
                         System.out.println("avant le return null");
                         return null;
                     }
@@ -257,16 +301,16 @@ public class InspectWebLinks {
                     });
                 }
                 if(certif) {
-                    text.getChildren().add(new Text("Le site suivant est down:"));
+                    text.getChildren().add(new Text("Le site suivant est down:\n"));
                     text.getChildren().add(h1);
-                    text.getChildren().add(new Text("sur la page:"));
+                    text.getChildren().add(new Text("\nsur la page:\n"));
                     text.getChildren().add(h2);
                 }
                 else{
-                    text.getChildren().add(new Text("Le site suivant doit être vérifié manuellement"));
+                    text.getChildren().add(new Text("Le site suivant doit être vérifié manuellement :\n"));
                     text.getChildren().add(h1);
                 }
-                text.getChildren().add(new Text("\n\n\n"));
+                text.getChildren().add(new Text("\n--------------------------------------\n"));
 
             }
         });

@@ -1,6 +1,7 @@
 package src;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,9 +11,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+import java.io.File;
 import java.io.IOException;
 
 public class UOHinterface extends Application {
@@ -21,7 +25,6 @@ public class UOHinterface extends Application {
     public static Scene s ;
     public static Stage stage ;
     public static Parent root ;
-    public static VBox pane ;
     public static TextFlow text ;
     public static void main(String[] args) {
         launch(args);
@@ -32,14 +35,23 @@ public class UOHinterface extends Application {
 
         System.out.println((getClass().getResource("sample.fxml")));
         root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        s = new Scene(root,800,600) ;
+        s = new Scene(root,1200,600) ;
         text = new TextFlow();
+        text.setTextAlignment(TextAlignment.CENTER);
         p = (ScrollPane)root.lookup("#myTxtID");
-        pane = new VBox() ;
-        pane.getChildren().add(text);
-        p.setContent(pane);
+        p.setContent(text);
+        p.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         stage = primaryStage ;
         System.out.println(p.getLayoutX());
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+                if(!InspectWebLinks.rap) {
+                    new File(InspectWebLinks.path).delete();
+                }
+            }
+        });
         primaryStage.setTitle("UOH Liens Morts");
         primaryStage.setScene(s);
         primaryStage.show();
