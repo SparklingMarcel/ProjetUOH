@@ -29,7 +29,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <ScrollPane fitToWidth="true">
+                        <ScrollPane fitToWidth="true" fx:id="myTxtID">
                             <GridPane.margin>
                                 <Insets />
                             </GridPane.margin>

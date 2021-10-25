@@ -3,15 +3,35 @@ package src;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.application.Application;
+import javafx.application.HostServices;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import static src.UOHinterface.*;
 
 public class InspectWebLinks {
     static String start_url = "https://uoh.fr/front/resultatsfr/";
@@ -23,7 +43,11 @@ public class InspectWebLinks {
     static FileWriter f;
     private static int nbPage = 0;
 
-    public static void main() {
+    public static void main(String[] args) {
+        launch();
+    }
+
+    public static void launch() {
         try {
             String path = System.getProperty("user.dir") + File.separator + "report.txt";
             System.out.println(path);
@@ -38,10 +62,9 @@ public class InspectWebLinks {
                 f.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                }
             }
         }
-
+    }
 
     /**
      * getNbPage récupère le nombre de page à analyser sur le site
@@ -93,6 +116,7 @@ public class InspectWebLinks {
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
+            System.out.println("BLBLBLBLBLBLL");
             if (e.getMessage().equals("received handshake warning: unrecognized_name") || e.getMessage().equals("PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested")) {
                 return 2;
             }
@@ -146,32 +170,106 @@ public class InspectWebLinks {
      * @throws IOException
      */
     private static void inspect() throws IOException {
-        String current_link = start_url ;
-        int cpt = 0;
-        while (cpt <= nbPage) {
-            cpt++;
-            System.out.println(current_link);
-            System.out.println("-------------------------------------------------");
-            HashMap<String, String> found_links = get_links_on_page(current_link);
-            for (String new_link : found_links.keySet()) {
-                System.out.println(new_link);
-                int x = check_link(new_link);
-                if (x == 0) {
-                    String fd = found_links.get(new_link);
-                    if (fd.equals("")) {
-                        fd = current_link;
+        final Service<Void> calculateLink = new Service<Void>() {
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    @Override
+                    protected Void call() {
+                        String current_link = start_url;
+                        int cpt = 0;
+                        while (cpt <= nbPage) {
+                            cpt++;
+                            System.out.println(current_link);
+                            System.out.println("-------------------------------------------------");
+                            HashMap<String, String> found_links = get_links_on_page(current_link);
+                            for (String new_link : found_links.keySet()) {
+                                System.out.println(new_link);
+                                int x = check_link(new_link);
+                                try {
+                                    String fd = found_links.get(new_link);
+                                    if (fd.equals("")) {
+                                        fd = current_link;
+                                    }
+                                    if (x == 0) {
+
+                                        brokenLinks += 1;
+                                        String txt2 = " Le site renvoie un message d'erreur " + new_link + " sur la page " + fd;
+                                        System.out.println("-------------------------------");
+                                        addNode(new_link,fd,true);
+                                        f.write("\n"+ txt2 +"\n");
+                                    } else if (x == 2) {
+                                        certifLinks += 1;
+                                        String txt = "le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier ";
+                                        System.out.println("certificat invalide");
+                                        addNode(new_link,fd,false);
+                                        f.write("\n"+txt+" "+ new_link+"\n");
+                                    }
+                                } catch (IOException e) {
+                                }
+                            }
+                            current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
+                        }
+
+                        System.out.println("avant le return null");
+                        return null;
                     }
-                    brokenLinks += 1;
-                    f.write("\n Le site renvoie un message d'erreur " + new_link + " sur la page " + fd + "\n");
-                } else if (x == 2) {
-                    certifLinks += 1;
-                    System.out.println("certificat invalide");
-                    f.write("\n le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier " + new_link + "\n");
-                }
+                };
             }
-            current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
+        };
+
+        calculateLink.stateProperty().
+
+    addListener(new ChangeListener<Worker.State>() {
+
+        @Override
+        public void changed (ObservableValue < ? extends Worker.State > observableValue, Worker.State
+        oldValue, Worker.State newValue){
+            switch (newValue) {
+                case FAILED:
+                case CANCELLED:
+                case SUCCEEDED:
+            }
         }
-        System.out.format("Finished! (%2d empty) (%2d skipped) (%2d broken) (%2d valid)", emptyLinks, skippedLinks, brokenLinks, validLinks);
+    });
+        calculateLink.start();
+}
+
+
+    public static void addNode(String link1,String link2,boolean certif) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                HostServices service = UOHinterface.getInstance().getHostServices();
+                Hyperlink h1 = new Hyperlink(link1);
+                Hyperlink h2 = new Hyperlink(link2) ;
+                List<Hyperlink> list = new ArrayList<>();
+                list.add(h1);
+                list.add(h2);
+
+                for(final Hyperlink hyperlink : list) {
+                    hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+
+                        @Override
+                        public void handle(ActionEvent t) {
+                            service.showDocument(hyperlink.getText());
+                        }
+                    });
+                }
+                if(certif) {
+                    text.getChildren().add(new Text("Le site suivant est down:"));
+                    text.getChildren().add(h1);
+                    text.getChildren().add(new Text("sur la page:"));
+                    text.getChildren().add(h2);
+                }
+                else{
+                    text.getChildren().add(new Text("Le site suivant doit être vérifié manuellement"));
+                    text.getChildren().add(h1);
+                }
+                text.getChildren().add(new Text("\n\n\n"));
+
+            }
+        });
     }
 }
 
