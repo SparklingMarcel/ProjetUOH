@@ -13,11 +13,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jsoup-1.14.3" level="project" />
-<<<<<<< Updated upstream
-=======
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="dev" level="project" />
-    <orderEntry type="library" name="poi" level="project" />
->>>>>>> Stashed changes
   </component>
 </module>

@@ -14,7 +14,5 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jsoup-1.14.3" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="dev" level="project" />
-    <orderEntry type="library" name="poi" level="project" />
   </component>
 </module>
