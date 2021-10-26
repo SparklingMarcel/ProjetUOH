@@ -6,31 +6,105 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import javafx.application.HostServices;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioButton;
+import javafx.scene.text.Text;
+>>>>>>> Stashed changes
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import src.main.multiInspect;
 
-public class InspectWebLinks {
+import static src.UOHinterface.*;
+
+public class InspectWebLinks implements Runnable {
+    static String path = System.getProperty("user.dir") + File.separator + "report.txt";
+    static String pathCsv = System.getProperty("user.dir") + File.separator + "report.csv";
+>>>>>>> Stashed changes
     static String start_url = "https://uoh.fr/front/resultatsfr/";
     static int validLinks = 0;
     static int brokenLinks = 0;
     static int emptyLinks = 0;
     static int skippedLinks = 0;
     static int certifLinks = 0;
+<<<<<<< Updated upstream
+=======
+    static boolean rap = false;
+>>>>>>> Stashed changes
     static FileWriter f;
-    private static int nbPage = 0;
+    public static int nbPage = 0;
+    public static int nbInt = 0;
+    int id;
 
+    public InspectWebLinks(int id) {
+        this.id = id;
+    }
+
+<<<<<<< Updated upstream
     public static void main(String args[]) {
+=======
+    public static void main(String[] args) {
+        launch();
+    }
+
+    public static void writeRapport() {
+
+        try {
+            rap = true;
+            RadioButton s = (RadioButton) root.lookup("#texte");
+            f.close();
+            if (s.isSelected()) {
+                return;
+            } else {
+                BufferedReader bf = new BufferedReader(new FileReader(path));
+                FileWriter bo = new FileWriter(pathCsv);
+                String su = "";
+                while ((su = bf.readLine()) != null) {
+                    System.out.println(su);
+                    bo.write(su);
+                }
+                bo.close();
+                bf.close();
+                new File(path).delete();
+
+            }
+
+            f.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static void launch() {
+>>>>>>> Stashed changes
         try {
             String path = System.getProperty("user.dir") + File.separator + "report.txt";
             System.out.println(path);
             f = new FileWriter(path);
             getNbPage();
+<<<<<<< Updated upstream
             inspect();
             f.close();
+=======
+            multiInspect.main();
+
+
+>>>>>>> Stashed changes
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -143,6 +217,7 @@ public class InspectWebLinks {
      *
      * @throws IOException
      */
+<<<<<<< Updated upstream
     private static void inspect() throws IOException {
         String current_link = start_url ;
         int cpt = 0;
@@ -166,10 +241,146 @@ public class InspectWebLinks {
                     System.out.println("certificat invalide");
                     f.write("\n le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier " + new_link + "\n");
                 }
+=======
+    private synchronized static void inspect(int cptStart) throws IOException {
+        final Service<Void> calculateLink = new Service<Void>() {
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    @Override
+                    protected Void call() {
+
+
+                        int cpt = (nbPage / 4) * cptStart;
+                        if (cptStart != 0) {
+                            cpt++;
+                        }
+                        int cptMax;
+                        String current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
+                        if (cptStart == 3) {
+                            cptMax = nbPage;
+                        } else {
+                            cptMax = (nbPage / 4) * (cptStart + 1);
+                        }
+                        while (cpt <= cptMax) {
+                            cpt++;
+                            nbInt++;
+                            System.out.println(current_link);
+                            System.out.println(nbInt);
+                            System.out.println("-------------------------------------------------");
+                            HashMap<String, String> found_links = get_links_on_page(current_link);
+                            for (String new_link : found_links.keySet()) {
+                                System.out.println(new_link);
+                                int x = check_link(new_link);
+                                String fd = found_links.get(new_link);
+                                if (fd.equals("")) {
+                                    fd = current_link;
+                                }
+                                if (x == 0) {
+
+                                    brokenLinks += 1;
+                                    String txt2 = " Le site renvoie un message d'erreur " + new_link + " sur la page " + fd;
+                                    System.out.println("-------------------------------");
+                                    addNode(new_link, fd, true);
+                                    try {
+                                        f.write("\n" + txt2 + "\n");
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    System.out.println("test");
+
+                                } else if (x == 2) {
+                                    certifLinks += 1;
+                                    String txt = "le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier ";
+                                    System.out.println("certificat invalide");
+                                    try {
+                                        f.write("\n" + txt + " " + new_link + "\n");
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    System.out.println("test");
+                                    addNode(new_link, fd, false);
+
+
+                                }
+
+                            }
+                            current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
+                        }
+                        Button b = (Button) root.lookup("#rapport");
+                        b.setDisable(false);
+                        System.out.println("avant le return null");
+                        return null;
+                    }
+                };
+            }
+        };
+
+        calculateLink.stateProperty().
+
+                addListener(new ChangeListener<Worker.State>() {
+
+                    @Override
+                    public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State
+                            oldValue, Worker.State newValue) {
+                        switch (newValue) {
+                            case FAILED:
+                            case CANCELLED:
+                            case SUCCEEDED:
+                                ProgressBar b = (ProgressBar) UOHinterface.root.lookup("#progBar");
+                                b.setVisible(false);
+                        }
+                    }
+                });
+        calculateLink.start();
+    }
+
+
+    public static void addNode(String link1, String link2, boolean certif) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                HostServices service = UOHinterface.getInstance().getHostServices();
+                Hyperlink h1 = new Hyperlink(link1);
+                Hyperlink h2 = new Hyperlink(link2);
+                List<Hyperlink> list = new ArrayList<>();
+                list.add(h1);
+                list.add(h2);
+
+                for (final Hyperlink hyperlink : list) {
+                    hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+
+                        @Override
+                        public void handle(ActionEvent t) {
+                            service.showDocument(hyperlink.getText());
+                        }
+                    });
+                }
+                if (certif) {
+                    text.getChildren().add(new Text("Le site suivant est down:\n"));
+                    text.getChildren().add(h1);
+                    text.getChildren().add(new Text("\nsur la page:\n"));
+                    text.getChildren().add(h2);
+                } else {
+                    text.getChildren().add(new Text("Le site suivant doit être vérifié manuellement :\n"));
+                    text.getChildren().add(h1);
+                }
+                text.getChildren().add(new Text("\n--------------------------------------\n"));
+
+>>>>>>> Stashed changes
             }
             current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
         }
         System.out.format("Finished! (%2d empty) (%2d skipped) (%2d broken) (%2d valid)", emptyLinks, skippedLinks, brokenLinks, validLinks);
+    }
+
+    @Override
+    public synchronized void run() {
+        try {
+            inspect(this.id);
+        } catch (Exception e) {
+
+        }
     }
 }
 
