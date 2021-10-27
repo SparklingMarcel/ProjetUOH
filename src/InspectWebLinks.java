@@ -60,30 +60,43 @@ public class InspectWebLinks implements Runnable {
         launch();
     }
 
+
     public static void writeRapport() {
 
 
         try {
+
+            // Création du radio button
             rap = true;
             RadioButton s = (RadioButton) root.lookup("#texte");
             File selectedFile ;
+
+            // On regarde quel est le type choisis par l'user avec isSelected()
             if (s.isSelected()) {
                 selectedFile = chooseFileType(true);
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
+
+                //On écrit dans le fichier
                 while ((su = bf.readLine()) != null) {
                     System.out.println(su);
                     bo.write(su + "\n");
                 }
+
                 bo.close();
                 bf.close();
+
+                //On supprime l'ancier txt
                 new File(path).delete();
+
             } else {
+
                 selectedFile = chooseFileType(false);
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
+
                 while ((su = bf.readLine()) != null) {
                     System.out.println(su);
                     bo.write(su + "\n");
@@ -92,7 +105,9 @@ public class InspectWebLinks implements Runnable {
                 bf.close();
                 new File(path).delete();
             }
+
             f.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -100,19 +115,31 @@ public class InspectWebLinks implements Runnable {
 
     }
 
+    /**
+     *
+     * @param txt Boolean
+     * @return File un fichier du type choisir par l'user (csv ou txt)
+     */
     private static File chooseFileType(Boolean txt) {
+
         final FileChooser chooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter ;
+
         if(txt) {
             extFilter = new FileChooser.ExtensionFilter("TEXT files (*.txt)", "*.txt");
         }
         else {
             extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
         }
+
         chooser.getExtensionFilters().add(extFilter);
+
         return chooser.showSaveDialog(stage) ;
     }
 
+    /**
+     * launch() lance le programme principal
+     */
     public static void launch() {
         try {
             System.out.println(path);
