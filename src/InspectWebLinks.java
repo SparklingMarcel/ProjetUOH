@@ -64,31 +64,45 @@ public class InspectWebLinks implements Runnable {
         launch();
     }
 
+
     public static void writeRapport() {
 
 
         try {
+
+            
             f.close();
             rap = true;
+            // Création du radio button
             RadioButton s = (RadioButton) root.lookup("#texte");
             File selectedFile ;
+
+            // On regarde quel est le type choisis par l'user avec isSelected()
             if (s.isSelected()) {
                 selectedFile = chooseFileType(true);
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
+
+                //On écrit dans le fichier
                 while ((su = bf.readLine()) != null) {
                     System.out.println(su);
                     bo.write(su + "\n");
                 }
+
                 bo.close();
                 bf.close();
+
+                //On supprime l'ancier txt
                 new File(path).delete();
+
             } else {
+
                 selectedFile = chooseFileType(false);
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
+
                 while ((su = bf.readLine()) != null) {
                     System.out.println(su);
                     bo.write(su + "\n");
@@ -97,6 +111,9 @@ public class InspectWebLinks implements Runnable {
                 bf.close();
                 new File(path).delete();
             }
+
+            f.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,16 +121,25 @@ public class InspectWebLinks implements Runnable {
 
     }
 
+    /**
+     *
+     * @param txt Boolean
+     * @return File un fichier du type choisir par l'user (csv ou txt)
+     */
     private static File chooseFileType(Boolean txt) {
+
         final FileChooser chooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter ;
+
         if(txt) {
             extFilter = new FileChooser.ExtensionFilter("TEXT files (*.txt)", "*.txt");
         }
         else {
             extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
         }
+
         chooser.getExtensionFilters().add(extFilter);
+
         File selected = null ;
         while(selected==null) {
             selected =chooser.showSaveDialog(stage);
@@ -121,6 +147,9 @@ public class InspectWebLinks implements Runnable {
         return  selected;
     }
 
+    /**
+     * launch() lance le programme principal
+     */
     public static void launch() {
         try {
 
@@ -317,7 +346,12 @@ public class InspectWebLinks implements Runnable {
         calculateLink.start();
     }
 
-
+    /**
+     * addNode rajoute les liens mort dans l'interface graphique et les écrit dans le fichier
+     * @param link1
+     * @param link2
+     * @param certif
+     */
     public synchronized static void addNode(String link1, String link2, boolean certif) {
         Platform.runLater(new Runnable() {
             @Override
