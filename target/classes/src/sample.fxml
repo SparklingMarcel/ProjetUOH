@@ -48,7 +48,7 @@
                         <RowConstraints maxHeight="169.39996948242185" minHeight="10.0" prefHeight="130.39996948242185" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
-                                <Button mnemonicParsing="false" onAction="#lancer" text="Lancer" />
+                                <Button mnemonicParsing="false" onAction="#lancer" text="Lancer" fx:id="bl" />
                                 <Button fx:id="rapport" disable="true" mnemonicParsing="false" onAction="#writeRap" prefHeight="39.0" prefWidth="94.0" text="Générer un rapport" GridPane.rowIndex="4" />
                         <RadioButton mnemonicParsing="false" text="Fichier csv" GridPane.rowIndex="3">
                            <toggleGroup>
@@ -64,10 +64,6 @@
                            </image>
                         </ImageView>
                             </children>
-                     <stylesheets>
-                        <URL value="@style.css" />
-                        <URL value="@style.css" />
-                     </stylesheets>
                         </GridPane>
                     </children>
                 </GridPane>
