@@ -80,6 +80,9 @@ public class InspectWebLinks implements Runnable {
             // On regarde quel est le type choisis par l'user avec isSelected()
             if (s.isSelected()) {
                 selectedFile = chooseFileType(true);
+                if(selectedFile == null) {
+                    return ;
+                }
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
@@ -99,6 +102,9 @@ public class InspectWebLinks implements Runnable {
             } else {
 
                 selectedFile = chooseFileType(false);
+                if(selectedFile == null) {
+                    return ;
+                }
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
@@ -140,11 +146,7 @@ public class InspectWebLinks implements Runnable {
 
         chooser.getExtensionFilters().add(extFilter);
 
-        File selected = null ;
-        while(selected==null) {
-            selected =chooser.showSaveDialog(stage);
-        }
-        return  selected;
+        return  chooser.showSaveDialog(stage);
     }
 
     /**
@@ -357,9 +359,9 @@ public class InspectWebLinks implements Runnable {
             @Override
             public void run() {
                 HostServices service = UOHinterface.getInstance().getHostServices();
-                String brok1 = " Le site renvoie un message d'erreur ";
-                String brok2 = " Sur la page ";
-                String cert1 = "Le site suivant doit être vérifié manuellement :";
+                String brok1 = "Le site renvoie un message d'erreur ";
+                String brok2 = " sur la page : ";
+                String cert1 = "Le site suivant doit être vérifié manuellement : ";
 
 
                 Hyperlink h1 = new Hyperlink(link1);
@@ -383,20 +385,22 @@ public class InspectWebLinks implements Runnable {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    text.getChildren().add(new Text("Le site suivant est down:\n"));
+                    text.getChildren().add(new Text(brok1+"\n"));
                     text.getChildren().add(h1);
-                    text.getChildren().add(new Text("\nsur la page:\n"));
+                    text.getChildren().add(new Text("\n"+brok2+"\n"));
                     text.getChildren().add(h2);
                     System.out.println("ECRITICI---------------------------------");
                     System.out.println(("\n" + brok1 + link1 + brok2 + link2 + "\n"));
                 } else {
                     try {
-                        f.write("\n" + cert1 + " " + link1 + "\n");
+                        f.write("\n" + cert1 + link1 + brok2 + link2+ "\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    text.getChildren().add(new Text(cert1 + "\n"));
+                    text.getChildren().add(new Text(cert1+"\n"));
                     text.getChildren().add(h1);
+                    text.getChildren().add(new Text("\n"+brok2+"\n"));
+                    text.getChildren().add(h2);
                 }
                 text.getChildren().add(new Text("\n--------------------------------------\n"));
 
