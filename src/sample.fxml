@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="620.0" prefWidth="682.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="src.Controller">
@@ -28,12 +25,12 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <ScrollPane fx:id="myTxtID" fitToWidth="true" pannable="true" prefHeight="858.0" prefWidth="400.0" style="-fx-background-color: #DEDEDE;" vbarPolicy="ALWAYS" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                        <ScrollPane fx:id="myTxtID" fitToWidth="true" pannable="true" prefHeight="858.0" prefWidth="400.0" vbarPolicy="ALWAYS" GridPane.columnSpan="2">
                             <GridPane.margin>
                                 <Insets />
                             </GridPane.margin>
                         </ScrollPane>
-                        <GridPane id="PaneBoutton" prefHeight="601.0" prefWidth="0.0" style="-fx-background-color: #ACAAAA;" GridPane.columnIndex="2">
+                        <GridPane prefHeight="601.0" prefWidth="0.0" GridPane.columnIndex="2">
                             <columnConstraints>
                                 <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="20.0" />
                             </columnConstraints>
@@ -53,62 +50,10 @@
                            </toggleGroup></RadioButton>
                         <RadioButton fx:id="texte" mnemonicParsing="false" selected="true" text="Fichier txt" toggleGroup="$group" GridPane.rowIndex="2" />
                             </children>
-                     <stylesheets>
-                        <URL value="@style.css" />
-                        <URL value="@style.css" />
-                     </stylesheets>
                         </GridPane>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="TOP">
-                     <image>
-                        <Image url="@main/ulogo-uoh-new-blanc-resized.png" />
-                     </image>
-                     <GridPane.margin>
-                        <Insets top="10.0" />
-                     </GridPane.margin></ImageView>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="TOP">
-                     <GridPane.margin>
-                        <Insets top="100.0" />
-                     </GridPane.margin>
-                     <image>
-                        <Image url="@main/ulogo-uoh-new-blanc-resized.png" />
-                     </image>
-                  </ImageView>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="TOP">
-                     <image>
-                        <Image url="@main/ulogo-uoh-new-blanc-resized.png" />
-                     </image>
-                     <GridPane.margin>
-                        <Insets top="210.0" />
-                     </GridPane.margin>
-                  </ImageView>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="TOP">
-                     <image>
-                        <Image url="@main/ulogo-uoh-new-blanc-resized.png" />
-                     </image>
-                     <GridPane.margin>
-                        <Insets top="300.0" />
-                     </GridPane.margin></ImageView>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="TOP">
-                     <GridPane.margin>
-                        <Insets top="410.0" />
-                     </GridPane.margin>
-                     <image>
-                        <Image url="@main/ulogo-uoh-new-blanc-resized.png" />
-                     </image></ImageView>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="TOP">
-                     <GridPane.margin>
-                        <Insets top="500.0" />
-                     </GridPane.margin>
-                     <image>
-                        <Image url="@main/ulogo-uoh-new-blanc-resized.png" />
-                     </image>
-                  </ImageView>
                     </children>
                 </GridPane>
-                <ProgressBar fx:id="progBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" progress="0.0" style="-fx-background-color: red;" visible="false">
-               <effect>
-                  <ColorAdjust />
-               </effect></ProgressBar>
+                <ProgressBar fx:id="progBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" progress="0.0" visible="false" />
             </children>
         </GridPane>
     </children>
