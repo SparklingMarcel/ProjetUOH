@@ -341,7 +341,12 @@ public class InspectWebLinks implements Runnable {
         calculateLink.start();
     }
 
-
+    /**
+     * addNode rajoute les liens mort dans l'interface graphique et les écrit dans le fichier
+     * @param link1
+     * @param link2
+     * @param certif
+     */
     public synchronized static void addNode(String link1, String link2, boolean certif) {
         Platform.runLater(new Runnable() {
             @Override
