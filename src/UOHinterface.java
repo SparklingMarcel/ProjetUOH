@@ -39,7 +39,7 @@ public class UOHinterface extends Application {
         p.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         stage = primaryStage ;
         System.out.println(p.getLayoutX());
-
+        primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent windowEvent) {
