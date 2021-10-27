@@ -21,6 +21,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,20 +34,27 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import static src.UOHinterface.*;
 
 public class InspectWebLinks implements Runnable {
-    static String path = System.getProperty("user.dir") + File.separator + "report.txt";
-    static String pathCsv = System.getProperty("user.dir") + File.separator + "report.csv";
-    static String start_url = "https://uoh.fr/front/resultatsfr/";
-    static int brokenLinks = 0;
-    static int certifLinks = 0;
-    static boolean rap = false;
-    static FileWriter f;
-    public static int nbPage = 0;
-    public static int nbInt = 0;
-    static int nbThreadFinish;
-    int id;
+
+    private static String path = System.getProperty("user.dir") + File.separator + "report.txt";
+    private static String pathCsv = System.getProperty("user.dir") + File.separator + "report.csv";
+    private static String start_url = "https://uoh.fr/front/resultatsfr/";
+    private static boolean rap = false;
+    private static FileWriter f;
+    private static int nbPage = 0;
+    private static int nbInt = 0;
+    private static int nbThreadFinish;
+    private int id;
 
     public InspectWebLinks(int id) {
         this.id = id;
+    }
+
+    public static String getPath() {
+        return path;
+    }
+
+    public static boolean isRap() {
+        return rap;
     }
 
     public static void main(String[] args) {
@@ -54,16 +62,29 @@ public class InspectWebLinks implements Runnable {
     }
 
     public static void writeRapport() {
-
+        final FileChooser chooser = new FileChooser();
+        File selectedFile = null;
+        while (selectedFile == null) {
+            selectedFile = chooser.showSaveDialog(null);
+        }
         try {
             rap = true;
             RadioButton s = (RadioButton) root.lookup("#texte");
             f.close();
             if (s.isSelected()) {
-                return;
+                BufferedReader bf = new BufferedReader(new FileReader(path));
+                FileWriter bo = new FileWriter(selectedFile.getName() + ".txt");
+                String su = "";
+                while ((su = bf.readLine()) != null) {
+                    System.out.println(su);
+                    bo.write(su + "\n");
+                }
+                bo.close();
+                bf.close();
+
             } else {
                 BufferedReader bf = new BufferedReader(new FileReader(path));
-                FileWriter bo = new FileWriter(pathCsv);
+                FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
                 while ((su = bf.readLine()) != null) {
                     System.out.println(su);
@@ -74,6 +95,7 @@ public class InspectWebLinks implements Runnable {
                 new File(path).delete();
 
             }
+
 
             f.close();
         } catch (IOException e) {
@@ -156,6 +178,14 @@ public class InspectWebLinks implements Runnable {
         }
     }
 
+    private static void midWayRap(boolean cert, String link1, String link2) {
+        if (cert) {
+
+        } else {
+
+        }
+    }
+
     /**
      * get_links_on_page récupère tous les liens présents sur une page
      *
@@ -201,7 +231,7 @@ public class InspectWebLinks implements Runnable {
      *
      * @throws IOException
      */
-    private synchronized static void inspect(int cptStart) throws IOException {
+    private static void inspect(int cptStart) throws IOException {
         final Service<Void> calculateLink = new Service<Void>() {
             @Override
             protected Task<Void> createTask() {
@@ -221,7 +251,7 @@ public class InspectWebLinks implements Runnable {
                         }
                         while (cpt <= cptMax) {
                             cpt++;
-                            pb.setProgress(((float)nbInt/nbPage));
+                            pb.setProgress(((float) nbInt / nbPage));
                             System.out.println(pb.getProgress());
                             nbInt++;
                             System.out.println(current_link);
@@ -230,39 +260,19 @@ public class InspectWebLinks implements Runnable {
                             HashMap<String, String> found_links = get_links_on_page(current_link);
                             for (String new_link : found_links.keySet()) {
                                 System.out.println(new_link);
-                                int x = check_link(new_link);
-                                String fd = found_links.get(new_link);
-                                if (fd.equals("")) {
-                                    fd = current_link;
-                                }
-                                if (x == 0) {
-
-                                    brokenLinks += 1;
-                                    String txt2 = " Le site renvoie un message d'erreur " + new_link + " sur la page " + fd;
-                                    System.out.println("-------------------------------");
-                                    addNode(new_link, fd, true);
-                                    try {
-                                        f.write("\n" + txt2 + "\n");
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                if (!new_link.startsWith("https://uoh.fr")) {
+                                    int x = check_link(new_link);
+                                    String fd = found_links.get(new_link);
+                                    if (fd.equals("")) {
+                                        fd = current_link;
                                     }
-                                    System.out.println("test");
-
-                                } else if (x == 2) {
-                                    certifLinks += 1;
-                                    String txt = "le certificat du site n'est pas valide, il faut vérifier le site manuellement ou il s'agit d'un pdf à vérifier ";
-                                    System.out.println("certificat invalide");
-                                    try {
-                                        f.write("\n" + txt + " " + new_link + "\n");
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                    if (x == 0) {
+                                        System.out.println("-------------------------------");
+                                        addNode(new_link, fd, true);
+                                    } else if (x == 2) {
+                                        addNode(new_link, fd, false);
                                     }
-                                    System.out.println("test");
-                                    addNode(new_link, fd, false);
-
-
                                 }
-
                             }
                             current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
                         }
@@ -298,11 +308,16 @@ public class InspectWebLinks implements Runnable {
     }
 
 
-    public static void addNode(String link1, String link2, boolean certif) {
+    public synchronized static void addNode(String link1, String link2, boolean certif) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 HostServices service = UOHinterface.getInstance().getHostServices();
+                String brok1 = " Le site renvoie un message d'erreur ";
+                String brok2 = " Sur la page";
+                String cert1 = "Le site suivant doit être vérifié manuellement :";
+
+
                 Hyperlink h1 = new Hyperlink(link1);
                 Hyperlink h2 = new Hyperlink(link2);
                 List<Hyperlink> list = new ArrayList<>();
@@ -319,12 +334,22 @@ public class InspectWebLinks implements Runnable {
                     });
                 }
                 if (certif) {
+                    try {
+                        f.write("\n" + brok1 + link1 + brok2 + link2 + "\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     text.getChildren().add(new Text("Le site suivant est down:\n"));
                     text.getChildren().add(h1);
                     text.getChildren().add(new Text("\nsur la page:\n"));
                     text.getChildren().add(h2);
                 } else {
-                    text.getChildren().add(new Text("Le site suivant doit être vérifié manuellement :\n"));
+                    try {
+                        f.write("\n" + cert1 + " " + link1 + "\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    text.getChildren().add(new Text(cert1 + "\n"));
                     text.getChildren().add(h1);
                 }
                 text.getChildren().add(new Text("\n--------------------------------------\n"));

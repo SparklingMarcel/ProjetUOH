@@ -17,7 +17,6 @@ import java.io.IOException;
 public class UOHinterface extends Application {
     private static UOHinterface mInstance;
     public static ScrollPane p ;
-    public static Scene s ;
     public static Stage stage ;
     public static Parent root ;
     public static TextFlow text ;
@@ -32,7 +31,7 @@ public class UOHinterface extends Application {
         System.out.println((getClass().getResource("sample.fxml")));
         root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         pb = (ProgressBar) UOHinterface.root.lookup("#progBar");
-        s = new Scene(root,1200,600) ;
+        Scene s = new Scene(root,1200,600) ;
         text = new TextFlow();
         text.setTextAlignment(TextAlignment.CENTER);
         p = (ScrollPane)root.lookup("#myTxtID");
@@ -44,8 +43,8 @@ public class UOHinterface extends Application {
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent windowEvent) {
-                if(!InspectWebLinks.rap) {
-                    new File(InspectWebLinks.path).delete();
+                if(!InspectWebLinks.isRap()) {
+                    new File(InspectWebLinks.getPath()).delete();
                 }
             }
         });
