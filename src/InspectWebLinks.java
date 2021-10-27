@@ -35,9 +35,8 @@ import static src.UOHinterface.*;
 
 public class InspectWebLinks implements Runnable {
 
-    private static String path = System.getProperty("user.dir") + File.separator + "report.txt";
-    private static String pathCsv = System.getProperty("user.dir") + File.separator + "report.csv";
-    private static String start_url = "https://uoh.fr/front/resultatsfr/";
+    private static final String path = System.getProperty("user.dir") + File.separator + "report.txt";
+    private static final String start_url = "https://uoh.fr/front/resultatsfr/";
     private static boolean rap = false;
     private static FileWriter f;
     private static int nbPage = 0;
@@ -62,27 +61,14 @@ public class InspectWebLinks implements Runnable {
     }
 
     public static void writeRapport() {
-        final FileChooser chooser = new FileChooser();
-        File selectedFile = null;
-        while (selectedFile == null) {
-            selectedFile = chooser.showSaveDialog(null);
-        }
+
+
         try {
             rap = true;
             RadioButton s = (RadioButton) root.lookup("#texte");
-            f.close();
+            File selectedFile ;
             if (s.isSelected()) {
-                BufferedReader bf = new BufferedReader(new FileReader(path));
-                FileWriter bo = new FileWriter(selectedFile.getName() + ".txt");
-                String su = "";
-                while ((su = bf.readLine()) != null) {
-                    System.out.println(su);
-                    bo.write(su + "\n");
-                }
-                bo.close();
-                bf.close();
-
-            } else {
+                selectedFile = chooseFileType(true);
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
                 String su = "";
@@ -93,16 +79,38 @@ public class InspectWebLinks implements Runnable {
                 bo.close();
                 bf.close();
                 new File(path).delete();
-
+            } else {
+                selectedFile = chooseFileType(false);
+                BufferedReader bf = new BufferedReader(new FileReader(path));
+                FileWriter bo = new FileWriter(selectedFile);
+                String su = "";
+                while ((su = bf.readLine()) != null) {
+                    System.out.println(su);
+                    bo.write(su + "\n");
+                }
+                bo.close();
+                bf.close();
+                new File(path).delete();
             }
-
-
             f.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    private static File chooseFileType(Boolean txt) {
+        final FileChooser chooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter ;
+        if(txt) {
+            extFilter = new FileChooser.ExtensionFilter("TEXT files (*.txt)", "*.txt");
+        }
+        else {
+            extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
+        }
+        chooser.getExtensionFilters().add(extFilter);
+        return chooser.showSaveDialog(stage) ;
     }
 
     public static void launch() {
@@ -178,13 +186,6 @@ public class InspectWebLinks implements Runnable {
         }
     }
 
-    private static void midWayRap(boolean cert, String link1, String link2) {
-        if (cert) {
-
-        } else {
-
-        }
-    }
 
     /**
      * get_links_on_page récupère tous les liens présents sur une page
