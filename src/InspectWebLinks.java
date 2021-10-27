@@ -28,6 +28,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import src.main.multiInspect;
 
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import static src.UOHinterface.*;
 
 public class InspectWebLinks implements Runnable {
@@ -40,6 +42,7 @@ public class InspectWebLinks implements Runnable {
     static FileWriter f;
     public static int nbPage = 0;
     public static int nbInt = 0;
+    static int nbThreadFinish;
     int id;
 
     public InspectWebLinks(int id) {
@@ -64,7 +67,7 @@ public class InspectWebLinks implements Runnable {
                 String su = "";
                 while ((su = bf.readLine()) != null) {
                     System.out.println(su);
-                    bo.write(su);
+                    bo.write(su + "\n");
                 }
                 bo.close();
                 bf.close();
@@ -109,7 +112,6 @@ public class InspectWebLinks implements Runnable {
         Elements nbRes = doc.select("span");
 
         for (Element l : nbRes) {
-
             Pattern p = Pattern.compile("<span class=\"nb-resultats\">");
             Matcher m = p.matcher(l.toString());
             if (m.find()) {
@@ -118,7 +120,6 @@ public class InspectWebLinks implements Runnable {
                 return;
             }
         }
-
     }
 
     /**
@@ -141,10 +142,14 @@ public class InspectWebLinks implements Runnable {
             } else {
                 return 1;
             }
+        } catch (SSLPeerUnverifiedException e) {
+            System.out.println("BLABLABLABLA");
+            return 2;
+
         } catch (IOException e) {
             System.err.println(e.getMessage());
             System.out.println("BLBLBLBLBLBLL");
-            if (e.getMessage().equals("received handshake warning: unrecognized_name") || e.getMessage().equals("PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested")) {
+            if (e.getMessage().equals("received handshake warning: unrecognized_name") || e.getMessage().equals("PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")) {
                 return 2;
             }
             return 0;
@@ -203,8 +208,6 @@ public class InspectWebLinks implements Runnable {
                 return new Task<Void>() {
                     @Override
                     protected Void call() {
-
-
                         int cpt = (nbPage / 4) * cptStart;
                         if (cptStart != 0) {
                             cpt++;
@@ -218,6 +221,8 @@ public class InspectWebLinks implements Runnable {
                         }
                         while (cpt <= cptMax) {
                             cpt++;
+                            pb.setProgress(((float)nbInt/nbPage));
+                            System.out.println(pb.getProgress());
                             nbInt++;
                             System.out.println(current_link);
                             System.out.println(nbInt);
@@ -261,8 +266,6 @@ public class InspectWebLinks implements Runnable {
                             }
                             current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
                         }
-                        Button b = (Button) root.lookup("#rapport");
-                        b.setDisable(false);
                         System.out.println("avant le return null");
                         return null;
                     }
@@ -281,8 +284,13 @@ public class InspectWebLinks implements Runnable {
                             case FAILED:
                             case CANCELLED:
                             case SUCCEEDED:
-                                ProgressBar b = (ProgressBar) UOHinterface.root.lookup("#progBar");
-                                b.setVisible(false);
+                                nbThreadFinish++;
+                                if (nbThreadFinish == 4) {
+                                    pb = (ProgressBar) UOHinterface.root.lookup("#progBar");
+                                    pb.setVisible(false);
+                                    Button but = (Button) root.lookup("#rapport");
+                                    but.setDisable(false);
+                                }
                         }
                     }
                 });

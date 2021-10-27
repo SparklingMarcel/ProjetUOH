@@ -48,12 +48,12 @@
                            <toggleGroup>
                               <ToggleGroup fx:id="group" />
                            </toggleGroup></RadioButton>
-                        <RadioButton mnemonicParsing="false" selected="true" text="Fichier txt" toggleGroup="$group" GridPane.rowIndex="2" fx:id="texte"/>
+                        <RadioButton fx:id="texte" mnemonicParsing="false" selected="true" text="Fichier txt" toggleGroup="$group" GridPane.rowIndex="2" />
                             </children>
                         </GridPane>
                     </children>
                 </GridPane>
-                <ProgressBar fx:id="progBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" visible="false" />
+                <ProgressBar fx:id="progBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" progress="0.0" visible="false" />
             </children>
         </GridPane>
     </children>

@@ -4,7 +4,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ToggleGroup;
-import src.InspectWebLinks;
 
 public class Controller {
     @FXML

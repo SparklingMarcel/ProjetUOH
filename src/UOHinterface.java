@@ -5,17 +5,12 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -26,6 +21,7 @@ public class UOHinterface extends Application {
     public static Stage stage ;
     public static Parent root ;
     public static TextFlow text ;
+    public static ProgressBar pb ;
     public static void main(String[] args) {
         launch(args);
     }
@@ -35,6 +31,7 @@ public class UOHinterface extends Application {
 
         System.out.println((getClass().getResource("sample.fxml")));
         root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        pb = (ProgressBar) UOHinterface.root.lookup("#progBar");
         s = new Scene(root,1200,600) ;
         text = new TextFlow();
         text.setTextAlignment(TextAlignment.CENTER);
