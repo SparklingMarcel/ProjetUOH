@@ -5,6 +5,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.text.TextAlignment;
@@ -21,6 +22,7 @@ public class UOHinterface extends Application {
     public static Parent root ;
     public static TextFlow text ;
     public static ProgressBar pb ;
+    public static Button bl ;
     public static void main(String[] args) {
         launch(args);
     }
@@ -30,7 +32,8 @@ public class UOHinterface extends Application {
 
         System.out.println((getClass().getResource("sample.fxml")));
         root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        pb = (ProgressBar) UOHinterface.root.lookup("#progBar");
+        pb = (ProgressBar) root.lookup("#progBar");
+        bl = (Button) root.lookup("#bl");
         Scene s = new Scene(root,1200,600) ;
         text = new TextFlow();
         text.setTextAlignment(TextAlignment.CENTER);
@@ -44,7 +47,13 @@ public class UOHinterface extends Application {
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent windowEvent) {
-                if(!InspectWebLinks.isRap()) {
+                try {
+                    InspectWebLinks.getF().close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if(InspectWebLinks.isRap()) {
                     new File(InspectWebLinks.getPath()).delete();
                 }
             }

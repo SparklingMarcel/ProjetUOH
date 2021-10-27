@@ -56,6 +56,10 @@ public class InspectWebLinks implements Runnable {
         return rap;
     }
 
+    public static FileWriter getF() {
+        return f;
+    }
+
     public static void main(String[] args) {
         launch();
     }
@@ -119,7 +123,8 @@ public class InspectWebLinks implements Runnable {
 
     public static void launch() {
         try {
-            System.out.println(path);
+
+            bl.setDisable(true);
             f = new FileWriter(path);
             getNbPage();
             multiInspect.main();
