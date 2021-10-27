@@ -36,7 +36,7 @@ public class UOHinterface extends Application {
         bl = (Button) root.lookup("#bl");
         Scene s = new Scene(root,1200,600) ;
         text = new TextFlow();
-        text.setTextAlignment(TextAlignment.CENTER);    
+        text.setTextAlignment(TextAlignment.CENTER);
         p = (ScrollPane)root.lookup("#myTxtID");
         p.setContent(text);
         p.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
@@ -48,7 +48,8 @@ public class UOHinterface extends Application {
             @Override
             public void handle(WindowEvent windowEvent) {
                 try {
-                    InspectWebLinks.getF().close();
+                    if(InspectWebLinks.getF()!=null)
+                        InspectWebLinks.getF().close();
 
                 } catch (IOException e) {
                     e.printStackTrace();
