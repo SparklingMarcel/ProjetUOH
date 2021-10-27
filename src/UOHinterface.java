@@ -37,6 +37,7 @@ public class UOHinterface extends Application {
         p = (ScrollPane)root.lookup("#myTxtID");
         p.setContent(text);
         p.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        p.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         stage = primaryStage ;
         System.out.println(p.getLayoutX());
         primaryStage.setResizable(false);

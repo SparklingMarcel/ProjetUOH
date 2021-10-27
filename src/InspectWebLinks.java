@@ -64,6 +64,7 @@ public class InspectWebLinks implements Runnable {
 
 
         try {
+            f.close();
             rap = true;
             RadioButton s = (RadioButton) root.lookup("#texte");
             File selectedFile ;
@@ -92,7 +93,6 @@ public class InspectWebLinks implements Runnable {
                 bf.close();
                 new File(path).delete();
             }
-            f.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,7 +110,11 @@ public class InspectWebLinks implements Runnable {
             extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
         }
         chooser.getExtensionFilters().add(extFilter);
-        return chooser.showSaveDialog(stage) ;
+        File selected = null ;
+        while(selected==null) {
+            selected =chooser.showSaveDialog(stage);
+        }
+        return  selected;
     }
 
     public static void launch() {
@@ -315,7 +319,7 @@ public class InspectWebLinks implements Runnable {
             public void run() {
                 HostServices service = UOHinterface.getInstance().getHostServices();
                 String brok1 = " Le site renvoie un message d'erreur ";
-                String brok2 = " Sur la page";
+                String brok2 = " Sur la page ";
                 String cert1 = "Le site suivant doit être vérifié manuellement :";
 
 
@@ -344,6 +348,8 @@ public class InspectWebLinks implements Runnable {
                     text.getChildren().add(h1);
                     text.getChildren().add(new Text("\nsur la page:\n"));
                     text.getChildren().add(h2);
+                    System.out.println("ECRITICI---------------------------------");
+                    System.out.println(("\n" + brok1 + link1 + brok2 + link2 + "\n"));
                 } else {
                     try {
                         f.write("\n" + cert1 + " " + link1 + "\n");
