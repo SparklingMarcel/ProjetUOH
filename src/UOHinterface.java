@@ -30,7 +30,7 @@ public class UOHinterface extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        System.out.println((getClass().getResource("sample.fxml")));
+
         root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         pb = (ProgressBar) root.lookup("#progBar");
         bl = (Button) root.lookup("#bl");

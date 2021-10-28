@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.effect.*?>
@@ -48,16 +47,19 @@
                         <RowConstraints maxHeight="169.39996948242185" minHeight="10.0" prefHeight="130.39996948242185" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
-                                <Button mnemonicParsing="false" onAction="#lancer" text="Lancer" fx:id="bl" />
+                                <Button fx:id="bl" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" mnemonicParsing="false" onAction="#lancer" prefHeight="40.0" prefWidth="94.0" text="Lancer">
+                           <GridPane.margin>
+                              <Insets top="170.0" />
+                           </GridPane.margin></Button>
                                 <Button fx:id="rapport" disable="true" mnemonicParsing="false" onAction="#writeRap" prefHeight="39.0" prefWidth="94.0" text="Générer un rapport" GridPane.rowIndex="4" />
                         <RadioButton mnemonicParsing="false" text="Fichier csv" GridPane.rowIndex="3">
                            <toggleGroup>
                               <ToggleGroup fx:id="group" />
                            </toggleGroup></RadioButton>
                         <RadioButton fx:id="texte" mnemonicParsing="false" selected="true" text="Fichier txt" toggleGroup="$group" GridPane.rowIndex="2" />
-                        <ImageView fitHeight="34.0" fitWidth="99.0" opacity="0.8" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                        <ImageView fitHeight="34.0" fitWidth="99.0" opacity="0.8" pickOnBounds="true" preserveRatio="true">
                            <GridPane.margin>
-                              <Insets top="100.0" />
+                              <Insets />
                            </GridPane.margin>
                            <image>
                               <Image url="@main/logoColor-1.png" />
