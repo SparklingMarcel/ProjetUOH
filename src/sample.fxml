@@ -59,7 +59,7 @@
                         <RadioButton fx:id="texte" mnemonicParsing="false" selected="true" text="Fichier txt" toggleGroup="$group" GridPane.rowIndex="2" />
                         <ImageView fitHeight="34.0" fitWidth="99.0" opacity="0.8" pickOnBounds="true" preserveRatio="true">
                            <GridPane.margin>
-                              <Insets />
+                              <Insets top="-40.0" />
                            </GridPane.margin>
                            <image>
                               <Image url="@main/logoColor-1.png" />

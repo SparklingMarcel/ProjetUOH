@@ -116,11 +116,7 @@ public class InspectWebLinks implements Runnable {
                 bf2.close();
 
             }
-            //On supprime l'ancier txt
-            File f = new File(path) ;
-            if(f.exists()) {
-                new File(path).delete();
-            }
+
 
 
         } catch (IOException e) {
