@@ -36,7 +36,7 @@ public class UOHinterface extends Application {
         root = fxmlLoader.load();
         pb = (ProgressBar) root.lookup("#progBar");
         bl = (Button) root.lookup("#bl");
-        Scene s = new Scene(root,12 00,600) ;
+        Scene s = new Scene(root,1200,600) ;
         text = new TextFlow();
         text.setTextAlignment(TextAlignment.CENTER);
         p = (ScrollPane)root.lookup("#myTxtID");
