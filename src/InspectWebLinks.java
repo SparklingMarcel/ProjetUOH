@@ -27,7 +27,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import src.main.multiInspect;
+import src.main.MultiInspect;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 
@@ -96,8 +96,7 @@ public class InspectWebLinks implements Runnable {
                 bo.close();
                 bf.close();
 
-                //On supprime l'ancier txt
-                new File(path).delete();
+
 
             } else {
 
@@ -105,20 +104,24 @@ public class InspectWebLinks implements Runnable {
                 if(selectedFile == null) {
                     return ;
                 }
-                BufferedReader bf = new BufferedReader(new FileReader(path));
-                FileWriter bo = new FileWriter(selectedFile);
+                BufferedReader bf2 = new BufferedReader(new FileReader(path));
+                FileWriter bo2 = new FileWriter(selectedFile);
                 String su = "";
 
-                while ((su = bf.readLine()) != null) {
+                while ((su = bf2.readLine()) != null) {
                     System.out.println(su);
-                    bo.write(su + "\n");
+                    bo2.write(su + "\n");
                 }
-                bo.close();
-                bf.close();
+                bo2.close();
+                bf2.close();
+
+            }
+            //On supprime l'ancier txt
+            File f = new File(path) ;
+            if(f.exists()) {
                 new File(path).delete();
             }
 
-            f.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -158,7 +161,7 @@ public class InspectWebLinks implements Runnable {
             bl.setDisable(true);
             f = new FileWriter(path);
             getNbPage();
-            multiInspect.main();
+            MultiInspect.main();
 
 
         } catch (IOException e) {
@@ -279,7 +282,7 @@ public class InspectWebLinks implements Runnable {
                 return new Task<Void>() {
                     @Override
                     protected Void call() {
-                        int cpt = (nbPage / 4) * cptStart;
+                        int cpt = (nbPage / MultiInspect.getNbThread()) * cptStart;
                         if (cptStart != 0) {
                             cpt++;
                         }
@@ -288,7 +291,7 @@ public class InspectWebLinks implements Runnable {
                         if (cptStart == 3) {
                             cptMax = nbPage;
                         } else {
-                            cptMax = (nbPage / 4) * (cptStart + 1);
+                            cptMax = (nbPage / MultiInspect.getNbThread()) * (cptStart + 1);
                         }
                         while (cpt <= cptMax) {
                             cpt++;
@@ -336,7 +339,7 @@ public class InspectWebLinks implements Runnable {
                             case CANCELLED:
                             case SUCCEEDED:
                                 nbThreadFinish++;
-                                if (nbThreadFinish == 4) {
+                                if (nbThreadFinish == MultiInspect.getNbThread()) {
                                     pb = (ProgressBar) UOHinterface.root.lookup("#progBar");
                                     pb.setVisible(false);
                                     Button but = (Button) root.lookup("#rapport");
