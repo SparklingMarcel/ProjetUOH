@@ -31,12 +31,12 @@ public class UOHinterface extends Application {
     public void start(Stage primaryStage) throws IOException {
 
         System.out.println((getClass().getResource("projectuoh/demo/sample.fxml")));
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("sample.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(UOHinterface.class.getResource("sample.fxml"));
         System.out.println("test");
         root = fxmlLoader.load();
         pb = (ProgressBar) root.lookup("#progBar");
         bl = (Button) root.lookup("#bl");
-        Scene s = new Scene(root,1200,600) ;
+        Scene s = new Scene(root,12 00,600) ;
         text = new TextFlow();
         text.setTextAlignment(TextAlignment.CENTER);
         p = (ScrollPane)root.lookup("#myTxtID");
