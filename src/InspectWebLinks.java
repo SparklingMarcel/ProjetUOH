@@ -1,6 +1,9 @@
 package src;
 
 import java.io.*;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +19,7 @@ import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.RadioButton;
+import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import org.jsoup.Connection.Response;
@@ -29,7 +29,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import src.main.MultiInspect;
 
-import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.*;
 
 import static src.UOHinterface.*;
 
@@ -43,10 +43,14 @@ public class InspectWebLinks implements Runnable {
     private static int nbInt = 0;
     private static int nbThreadFinish;
     private int id;
+    private static TrustManager[] trustAllCertificates ;
+    private static HostnameVerifier trustAllHostnames ;
 
     public InspectWebLinks(int id) {
         this.id = id;
     }
+
+
 
     public static String getPath() {
         return path;
@@ -126,6 +130,44 @@ public class InspectWebLinks implements Runnable {
 
     }
 
+    private static void initCert() {
+            trustAllCertificates = new TrustManager[] {
+                    new X509TrustManager() {
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null; // Not relevant.
+                        }
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                            // Do nothing. Just allow them all.
+                        }
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                            // Do nothing. Just allow them all.
+                        }
+                    }
+            };
+
+             trustAllHostnames = new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true; // Just allow them all.
+                }
+            };
+
+            try {
+                System.setProperty("jsse.enableSNIExtension", "false");
+                SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, trustAllCertificates, new SecureRandom());
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
+            }
+            catch (GeneralSecurityException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+
     /**
      *
      * @param txt Boolean
@@ -153,7 +195,9 @@ public class InspectWebLinks implements Runnable {
      */
     public static void launch() {
         try {
-
+            if(ch.isSelected()) {
+                initCert();
+            }
             bl.setDisable(true);
             f = new FileWriter(path);
             getNbPage();

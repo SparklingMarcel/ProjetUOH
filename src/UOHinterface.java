@@ -5,13 +5,14 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -23,6 +24,7 @@ public class UOHinterface extends Application {
     public static TextFlow text ;
     public static ProgressBar pb ;
     public static Button bl ;
+    public static CheckBox ch ;
     public static void main(String[] args) {
         launch(args);
     }
@@ -34,6 +36,14 @@ public class UOHinterface extends Application {
         root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         pb = (ProgressBar) root.lookup("#progBar");
         bl = (Button) root.lookup("#bl");
+        ch = (CheckBox) root.lookup("#cert");
+        final Tooltip tooltip = new Tooltip();
+        tooltip.setShowDelay(Duration.millis(200));
+        tooltip.setText("""
+                Cochez cette case pour autoriser la vérification de tous les sites
+                cela autorise la vérification des sites à certificats invalides
+                """);
+        ch.setTooltip(tooltip);
         Scene s = new Scene(root,1200,600) ;
         text = new TextFlow();
         text.setTextAlignment(TextAlignment.CENTER);
