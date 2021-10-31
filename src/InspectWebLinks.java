@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -43,13 +42,12 @@ public class InspectWebLinks implements Runnable {
     private static int nbInt = 0;
     private static int nbThreadFinish;
     private int id;
-    private static TrustManager[] trustAllCertificates ;
-    private static HostnameVerifier trustAllHostnames ;
+    private static TrustManager[] trustAllCertificates;
+    private static HostnameVerifier trustAllHostnames;
 
     public InspectWebLinks(int id) {
         this.id = id;
     }
-
 
 
     public static String getPath() {
@@ -74,18 +72,18 @@ public class InspectWebLinks implements Runnable {
 
         try {
 
-            
+
             f.close();
             rap = true;
             // Création du radio button
             RadioButton s = (RadioButton) root.lookup("#texte");
-            File selectedFile ;
+            File selectedFile;
 
             // On regarde quel est le type choisis par l'user avec isSelected()
             if (s.isSelected()) {
                 selectedFile = chooseFileType(true);
-                if(selectedFile == null) {
-                    return ;
+                if (selectedFile == null) {
+                    return;
                 }
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
@@ -101,12 +99,11 @@ public class InspectWebLinks implements Runnable {
                 bf.close();
 
 
-
             } else {
 
                 selectedFile = chooseFileType(false);
-                if(selectedFile == null) {
-                    return ;
+                if (selectedFile == null) {
+                    return;
                 }
                 BufferedReader bf2 = new BufferedReader(new FileReader(path));
                 FileWriter bo2 = new FileWriter(selectedFile);
@@ -122,7 +119,6 @@ public class InspectWebLinks implements Runnable {
             }
 
 
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -131,63 +127,62 @@ public class InspectWebLinks implements Runnable {
     }
 
     private static void initCert() {
-            trustAllCertificates = new TrustManager[] {
-                    new X509TrustManager() {
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null; // Not relevant.
-                        }
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                            // Do nothing. Just allow them all.
-                        }
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                            // Do nothing. Just allow them all.
-                        }
+        trustAllCertificates = new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return null; // Not relevant.
                     }
-            };
 
-             trustAllHostnames = new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true; // Just allow them all.
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        // Do nothing. Just allow them all.
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        // Do nothing. Just allow them all.
+                    }
                 }
-            };
+        };
 
-            try {
-                System.setProperty("jsse.enableSNIExtension", "false");
-                SSLContext sc = SSLContext.getInstance("SSL");
-                sc.init(null, trustAllCertificates, new SecureRandom());
-                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-                HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
+        trustAllHostnames = new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true; // Just allow them all.
             }
-            catch (GeneralSecurityException e) {
-                throw new ExceptionInInitializerError(e);
-            }
+        };
+
+        try {
+            System.setProperty("jsse.enableSNIExtension", "false");
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCertificates, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
+        } catch (GeneralSecurityException e) {
+            throw new ExceptionInInitializerError(e);
         }
+    }
 
 
     /**
-     *
      * @param txt Boolean
      * @return File un fichier du type choisir par l'user (csv ou txt)
      */
     private static File chooseFileType(Boolean txt) {
 
         final FileChooser chooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter ;
+        FileChooser.ExtensionFilter extFilter;
 
-        if(txt) {
+        if (txt) {
             extFilter = new FileChooser.ExtensionFilter("TEXT files (*.txt)", "*.txt");
-        }
-        else {
+        } else {
             extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
         }
 
         chooser.getExtensionFilters().add(extFilter);
 
-        return  chooser.showSaveDialog(stage);
+        return chooser.showSaveDialog(stage);
     }
 
     /**
@@ -195,7 +190,7 @@ public class InspectWebLinks implements Runnable {
      */
     public static void launch() {
         try {
-            if(ch.isSelected()) {
+            if (ch.isSelected()) {
                 initCert();
             }
             ch.setDisable(true);
@@ -242,12 +237,11 @@ public class InspectWebLinks implements Runnable {
      * @param url lien à vérifier
      * @return 0 ( lien mort ) ou 1 (lien non mort) ou 2 (lien à vérifier)
      */
-    private static int check_link(String url)  {
+    private static int check_link(String url) {
+
         Response response;
         try {
-
             response = Jsoup.connect(url).execute();
-
             if (response.statusCode() == 404) {
                 return 0;
             } else {
@@ -386,6 +380,7 @@ public class InspectWebLinks implements Runnable {
 
     /**
      * addNode rajoute les liens mort dans l'interface graphique et les écrit dans le fichier
+     *
      * @param link1
      * @param link2
      * @param certif
@@ -421,21 +416,21 @@ public class InspectWebLinks implements Runnable {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    text.getChildren().add(new Text(brok1+"\n"));
+                    text.getChildren().add(new Text(brok1 + "\n"));
                     text.getChildren().add(h1);
-                    text.getChildren().add(new Text("\n"+brok2+"\n"));
+                    text.getChildren().add(new Text("\n" + brok2 + "\n"));
                     text.getChildren().add(h2);
                     System.out.println("ECRITICI---------------------------------");
                     System.out.println(("\n" + brok1 + link1 + brok2 + link2 + "\n"));
                 } else {
                     try {
-                        f.write("\n" + cert1 + link1 + brok2 + link2+ "\n");
+                        f.write("\n" + cert1 + link1 + brok2 + link2 + "\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    text.getChildren().add(new Text(cert1+"\n"));
+                    text.getChildren().add(new Text(cert1 + "\n"));
                     text.getChildren().add(h1);
-                    text.getChildren().add(new Text("\n"+brok2+"\n"));
+                    text.getChildren().add(new Text("\n" + brok2 + "\n"));
                     text.getChildren().add(h2);
                 }
                 text.getChildren().add(new Text("\n--------------------------------------\n"));
