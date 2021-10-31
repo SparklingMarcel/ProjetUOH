@@ -198,6 +198,7 @@ public class InspectWebLinks implements Runnable {
             if(ch.isSelected()) {
                 initCert();
             }
+            ch.setDisable(true);
             bl.setDisable(true);
             f = new FileWriter(path);
             getNbPage();
@@ -241,27 +242,19 @@ public class InspectWebLinks implements Runnable {
      * @param url lien à vérifier
      * @return 0 ( lien mort ) ou 1 (lien non mort) ou 2 (lien à vérifier)
      */
-    private static int check_link(String url) {
-        Pattern p = Pattern.compile(".*\\.pdf$|.*\\.PDF$");
-        Matcher m = p.matcher(url);
-        if (m.find()) {
-            return 2;
-        }
+    private static int check_link(String url)  {
         Response response;
         try {
+
             response = Jsoup.connect(url).execute();
+
             if (response.statusCode() == 404) {
                 return 0;
             } else {
                 return 1;
             }
-        } catch (SSLPeerUnverifiedException e) {
-            System.out.println("BLABLABLABLA");
-            return 2;
-
         } catch (IOException e) {
-            System.err.println(e.getMessage());
-            System.out.println("BLBLBLBLBLBLL");
+            e.printStackTrace();
             if (e.getMessage().equals("received handshake warning: unrecognized_name") || e.getMessage().equals("PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")) {
                 return 2;
             }

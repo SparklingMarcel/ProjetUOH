@@ -11,8 +11,6 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
