@@ -257,6 +257,33 @@ public class InspectWebLinks implements Runnable {
     }
 
 
+    private static HashMap<String, String> get_links_bottom_once(String url) {
+        Document doc = null;
+        HashMap<String, String> hm = new HashMap<>();
+        try {
+            doc = Jsoup.connect(url).userAgent("Mozilla").get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
+        String s1 = "";
+        Elements links = doc.select("div.resultats-catalogue-site");
+        Pattern p = Pattern.compile("href=\".*?\"");
+        for (Element l : links) {
+            Matcher m = p.matcher(l.toString());
+            if (m.find()) {
+                s1 = m.group().subSequence(6, m.group().length() - 1).toString();
+                if (s1.charAt(0) != 'h') {
+                    s1 = "http://" + s1;
+                }
+                hm.put(s1, "");
+            }
+        }
+        return hm;
+    }
+
+
+
     /**
      * get_links_on_page récupère tous les liens présents sur une page
      *
@@ -321,14 +348,18 @@ public class InspectWebLinks implements Runnable {
                             cptMax = (nbPage / MultiInspect.getNbThread()) * (cptStart + 1);
                         }
                         while (cpt <= cptMax) {
+                            HashMap<String, String> found_links = get_links_on_page(current_link);
+                            if(cpt==0) {
+                                found_links.putAll(get_links_bottom_once(start_url));
+                            }
                             cpt++;
                             pb.setProgress(((float) nbInt / nbPage));
-                            System.out.println(pb.getProgress());
+
                             nbInt++;
                             System.out.println(current_link);
                             System.out.println(nbInt);
                             System.out.println("-------------------------------------------------");
-                            HashMap<String, String> found_links = get_links_on_page(current_link);
+
                             for (String new_link : found_links.keySet()) {
                                 System.out.println(new_link);
                                 if (!new_link.startsWith("https://uoh.fr")) {
