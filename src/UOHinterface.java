@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -49,6 +50,8 @@ public class UOHinterface extends Application {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         stage = primaryStage ;
+        System.out.println(UOHinterface.class);
+        stage.getIcons().add(new Image(UOHinterface.class.getResourceAsStream("main/logoColor-1.png"))); // ajout de l'icone
         primaryStage.setResizable(false); // on empêche l'utilisateur de changer la taille de l'application
         // quand on ferme l'application
         primaryStage.setOnCloseRequest(windowEvent -> {

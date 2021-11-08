@@ -62,7 +62,7 @@
                               <Insets top="-40.0" />
                            </GridPane.margin>
                            <image>
-                              <Image url="@main/logoColor-1.png" />
+                              <Image url="@logoColor-1.png" />
                            </image>
                         </ImageView>
                         <CheckBox mnemonicParsing="false" prefHeight="55.0" prefWidth="94.0" text=" Gérer les&#10; certificats" GridPane.rowIndex="1" fx:id="cert"/>
