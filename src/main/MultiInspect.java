@@ -3,18 +3,16 @@ package src.main;
 import src.InspectWebLinks;
 
 public class MultiInspect {
-    private static int nbThread = 4 ;
-    public static void main() {
-        int n = nbThread; // Number of threads
-        for (int i = 0; i < n; i++) {
-            Thread object
-                    = new Thread(new InspectWebLinks(i));
+    private static final int nbThread = 4 ; // le nombre de thread qu'on utilise
 
+    public static void main() { // Creation des threads
+        for (int i = 0; i < nbThread; i++) {
+            Thread object = new Thread(new InspectWebLinks(i));
             object.start();
         }
     }
 
-    public static int getNbThread() {
+    public static int getNbThread() { // retourne le nombre de thread
         return nbThread;
     }
 }

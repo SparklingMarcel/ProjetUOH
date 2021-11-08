@@ -27,7 +27,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import src.main.MultiInspect;
-
 import javax.net.ssl.*;
 
 import static src.UOHinterface.*;
@@ -41,14 +40,11 @@ public class InspectWebLinks implements Runnable {
     private static int nbPage = 0;
     private static int nbInt = 0;
     private static int nbThreadFinish;
-    private int id;
-    private static TrustManager[] trustAllCertificates;
-    private static HostnameVerifier trustAllHostnames;
+    private final int id;
 
     public InspectWebLinks(int id) {
         this.id = id;
     }
-
 
     public static String getPath() {
         return path;
@@ -67,39 +63,36 @@ public class InspectWebLinks implements Runnable {
     }
 
 
+    /**
+     * Permet de créer et d'écrire le fichier final en fonction du choix ( txt ou CSV )
+     */
     public static void writeRapport() {
 
 
         try {
-
-
             f.close();
             rap = true;
             // Création du radio button
             RadioButton s = (RadioButton) root.lookup("#texte");
             File selectedFile;
-
-            // On regarde quel est le type choisis par l'user avec isSelected()
-            if (s.isSelected()) {
-                selectedFile = chooseFileType(true);
+            // On regarde quel est le type choisi par l'user avec isSelected()
+            if (s.isSelected()) { // Si l'utilisateur a choisi TXT
+                selectedFile = chooseFileType(true); // Selection du dossier de sauvegarde du fichier
                 if (selectedFile == null) {
                     return;
                 }
                 BufferedReader bf = new BufferedReader(new FileReader(path));
                 FileWriter bo = new FileWriter(selectedFile);
-                String su = "";
-
+                String su;
                 //On écrit dans le fichier
                 while ((su = bf.readLine()) != null) {
-                    System.out.println(su);
                     bo.write(su + "\n");
                 }
-
                 bo.close();
                 bf.close();
 
 
-            } else {
+            } else { // Si l'utilisateur a choisi CSV
 
                 selectedFile = chooseFileType(false);
                 if (selectedFile == null) {
@@ -107,10 +100,9 @@ public class InspectWebLinks implements Runnable {
                 }
                 BufferedReader bf2 = new BufferedReader(new FileReader(path));
                 FileWriter bo2 = new FileWriter(selectedFile);
-                String su = "";
+                String su;
 
                 while ((su = bf2.readLine()) != null) {
-                    System.out.println(su);
                     bo2.write(su + "\n");
                 }
                 bo2.close();
@@ -126,8 +118,11 @@ public class InspectWebLinks implements Runnable {
 
     }
 
-    private static void initCert() {
-        trustAllCertificates = new TrustManager[]{
+    private static void initCert() { // Gestion des certificats , autorisation de tous les certificats SSL uniquement pendant l'execution du programme
+        // Not relevant.
+        // Do nothing. Just allow them all.
+        // Do nothing. Just allow them all.
+        TrustManager[] trustAllCertificates = new TrustManager[]{
                 new X509TrustManager() {
                     @Override
                     public X509Certificate[] getAcceptedIssuers() {
@@ -146,15 +141,13 @@ public class InspectWebLinks implements Runnable {
                 }
         };
 
-        trustAllHostnames = new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true; // Just allow them all.
-            }
+        // Just allow them all.
+        HostnameVerifier trustAllHostnames = (hostname, session) -> {
+            return true; // Just allow them all.
         };
 
         try {
-            System.setProperty("jsse.enableSNIExtension", "false");
+            System.setProperty("jsse.enableSNIExtension", "false"); // On désactive la vérification des certificats par Java
             SSLContext sc = SSLContext.getInstance("SSL");
             sc.init(null, trustAllCertificates, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
@@ -174,7 +167,7 @@ public class InspectWebLinks implements Runnable {
         final FileChooser chooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter;
 
-        if (txt) {
+        if (txt) { // Si c'est l'utilisateur a choisit le format texte, on force l'utilisateur à créer un fichier de type texte, sinon CSV
             extFilter = new FileChooser.ExtensionFilter("TEXT files (*.txt)", "*.txt");
         } else {
             extFilter = new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv");
@@ -182,7 +175,7 @@ public class InspectWebLinks implements Runnable {
 
         chooser.getExtensionFilters().add(extFilter);
 
-        return chooser.showSaveDialog(stage);
+        return chooser.showSaveDialog(stage); // Affichage de la fenêtre pour choisir le répertoire de création du fichier
     }
 
     /**
@@ -190,15 +183,14 @@ public class InspectWebLinks implements Runnable {
      */
     public static void launch() {
         try {
-            if (ch.isSelected()) {
+            if (checkBox.isSelected()) { // Si le bouton de gestion des certificats est coché
                 initCert();
             }
-            ch.setDisable(true);
-            bl.setDisable(true);
+            checkBox.setDisable(true);
+            launchButton.setDisable(true);
             f = new FileWriter(path);
             getNbPage();
             MultiInspect.main();
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -208,7 +200,7 @@ public class InspectWebLinks implements Runnable {
     /**
      * getNbPage récupère le nombre de page à analyser sur le site
      */
-    private static void getNbPage() {
+    private static void getNbPage() { // récupère le nombre de page total des ressources
         Document doc = null;
         try {
             doc = Jsoup.connect(start_url).userAgent("Mozilla").get();
@@ -216,20 +208,13 @@ public class InspectWebLinks implements Runnable {
             e.printStackTrace();
         }
         assert doc != null;
-        Elements links2 = doc.select("div.carte-notice-liens-footer");
-
-        Elements nbRes = doc.select("span");
-
-        for (Element l : nbRes) {
-            Pattern p = Pattern.compile("<span class=\"nb-resultats\">");
-            Matcher m = p.matcher(l.toString());
-            if (m.find()) {
-                String afterSpan = l.toString().split(">")[1];
-                nbPage = (Integer.parseInt(afterSpan.split(" ")[0]) / links2.size()) + 1;
-                return;
-            }
-        }
+        Elements links2 = doc.select("div.carte-notice-liens-footer"); // On recupère le nombre de notice par page
+        Elements spanRes = doc.select("span.nb-resultats"); // On recupère le nombre de ressource total
+        String afterSpan = spanRes.get(0).toString().split(">")[1];
+        nbPage = (Integer.parseInt(afterSpan.split(" ")[0]) / links2.size()) + 1; // on calcul le nombre de page
     }
+
+
 
     /**
      * check_link vérifie si un lien est mort ou non
@@ -237,7 +222,7 @@ public class InspectWebLinks implements Runnable {
      * @param url lien à vérifier
      * @return 0 ( lien mort ) ou 1 (lien non mort) ou 2 (lien à vérifier)
      */
-    private static int check_link(String url) {
+    private static int check_link(String url) { // On vérifie si un lien renvoie un message d'erreur
 
         Response response;
         try {
@@ -248,7 +233,7 @@ public class InspectWebLinks implements Runnable {
                 return 1;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            // On retourne 2 si le certificat est invalide ( dans le cas ou on a pas coché la checkbox)
             if (e.getMessage().equals("received handshake warning: unrecognized_name") || e.getMessage().equals("PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target")) {
                 return 2;
             }
@@ -257,23 +242,23 @@ public class InspectWebLinks implements Runnable {
     }
 
 
-    private static HashMap<String, String> get_links_bottom_once(String url) {
+    private static HashMap<String, String> get_links_bottom_once() { // Récupére les liens en bas de page ( dans la section élargissez votre recherche
         Document doc = null;
         HashMap<String, String> hm = new HashMap<>();
         try {
-            doc = Jsoup.connect(url).userAgent("Mozilla").get();
+            doc = Jsoup.connect(InspectWebLinks.start_url).userAgent("Mozilla").get();
         } catch (IOException e) {
             e.printStackTrace();
         }
         assert doc != null;
-        String s1 = "";
-        Elements links = doc.select("div.resultats-catalogue-site");
-        Pattern p = Pattern.compile("href=\".*?\"");
+        String s1;
+        Elements links = doc.select("div.resultats-catalogue-site"); // On récupère la div élargissez votre recherche
+        Pattern p = Pattern.compile("href=\".*?\""); // on cherche les liens ( href ) à l'intérieur
         for (Element l : links) {
             Matcher m = p.matcher(l.toString());
             if (m.find()) {
                 s1 = m.group().subSequence(6, m.group().length() - 1).toString();
-                if (s1.charAt(0) != 'h') {
+                if (!s1.startsWith("http")) { // si le site ne commence pas par http
                     s1 = "http://" + s1;
                 }
                 hm.put(s1, "");
@@ -283,14 +268,13 @@ public class InspectWebLinks implements Runnable {
     }
 
 
-
     /**
      * get_links_on_page récupère tous les liens présents sur une page
      *
      * @param url url de la page où on récupère les liens
      * @return un hashMap contenant le lien de la ressource externe associée au lien de la notice
      */
-    private static HashMap<String, String> get_links_on_page(String url) {
+    private static HashMap<String, String> get_links_on_page(String url) { // Récupère les liens des cartes notice sur chaque page une par une
         Document doc = null;
         try {
             doc = Jsoup.connect(url).userAgent("Mozilla").get();
@@ -298,26 +282,26 @@ public class InspectWebLinks implements Runnable {
             e.printStackTrace();
         }
         assert doc != null;
-        Elements links2 = doc.select("div.carte-notice-liens-footer");
-        Pattern p = Pattern.compile("href=\".*?>");
+        Elements links2 = doc.select("div.carte-notice-liens-footer"); // on recupère tous les footers de chacune des notices
+        Pattern p = Pattern.compile("href=\".*?>"); // on recupère les liens dedans
         HashMap<String, String> found_url = new HashMap<>();
         String s1, s2 = "";
-        for (Element link2 : links2) {
+        for (Element link2 : links2) { // pour tous les footers différents des cartes notices
             Matcher m = p.matcher(link2.toString());
-            if (m.find()) {
+            if (m.find()) { // Si on trouve un premier lien, on le récupère ( ressource externe )
                 s1 = m.group().subSequence(6, m.group().length() - 2).toString();
-                if (s1.charAt(0) != 'h') {
+                if (!s1.startsWith("http")) {
                     s1 = "http://" + s1;
                 }
-                if (m.find()) {
+                if (m.find()) { // Si on trouve un deuxième lien ( le lien de la notice correspondant à la ressource )
                     s2 = m.group().subSequence(6, m.group().length() - 2).toString();
-                    if (s2.charAt(0) != 'h') {
+                    if (!s2.startsWith("http")) {
                         s2 = "http://" + s2;
                     }
                     s2 = s2.replace("?lang=fr&amp;", "/?");
 
                 }
-                found_url.put(s1, s2);
+                found_url.put(s1, s2); // on retourne une hashmap avec la ressource externe et la notice qui lui correspond
             }
 
         }
@@ -329,85 +313,70 @@ public class InspectWebLinks implements Runnable {
      *
      * @throws IOException
      */
-    private static void inspect(int cptStart) throws IOException {
-        final Service<Void> calculateLink = new Service<Void>() {
+    private static void inspect(int cptStart) {  // Permet de vérifier chaque lien et de faire ce qu'il faut en conséquence
+        final Service<Void> calculateLink = new Service<>() { // On utilise un thread différent de l'interface graphique
             @Override
             protected Task<Void> createTask() {
-                return new Task<Void>() {
+                return new Task<>() {
                     @Override
                     protected Void call() {
-                        int cpt = (nbPage / MultiInspect.getNbThread()) * cptStart;
+                        int cpt = (nbPage / MultiInspect.getNbThread()) * cptStart; // On assigne à chaque thread sa page de départ
                         if (cptStart != 0) {
-                            cpt++;
+                            cpt++; // comme c'est une division entière, il faut assigner une page plus loin pour les thread
                         }
                         int cptMax;
-                        String current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
-                        if (cptStart == 3) {
-                            cptMax = nbPage;
+                        String current_link = start_url + "?query&pagination=" + cpt + "&sort=score"; // on assigne leur page de départ
+                        if (cptStart == MultiInspect.getNbThread() - 1) {
+                            cptMax = nbPage; // si c'est le dernier thread, il s'arrête au nombre de page
                         } else {
-                            cptMax = (nbPage / MultiInspect.getNbThread()) * (cptStart + 1);
+                            cptMax = (nbPage / MultiInspect.getNbThread()) * (cptStart + 1); // on assigne la dernière page que doit vérifier chaque thread
                         }
                         while (cpt <= cptMax) {
                             HashMap<String, String> found_links = get_links_on_page(current_link);
-                            if(cpt==0) {
-                                found_links.putAll(get_links_bottom_once(start_url));
+                            if (cpt == 0) {
+                                found_links.putAll(get_links_bottom_once()); // on donne au premier thread les liens en bas de page ( une fois seulement )
                             }
                             cpt++;
-                            pb.setProgress(((float) nbInt / nbPage));
-
-                            nbInt++;
-                            System.out.println(current_link);
-                            System.out.println(nbInt);
-                            System.out.println("-------------------------------------------------");
-
+                            progressBar.setProgress(((float) nbInt / nbPage)); // on fait progresser la bar de progression
+                            nbInt++; // nombre de page vérifié
                             for (String new_link : found_links.keySet()) {
-                                System.out.println(new_link);
                                 if (!new_link.startsWith("https://uoh.fr")) {
-                                    int x = check_link(new_link);
+                                    int x = check_link(new_link); // 2 si problème de certificat, 0 si le site renvoi un message d'erreur
                                     String fd = found_links.get(new_link);
-                                    if (fd.equals("")) {
+                                    if (fd.equals("")) { // si le site externe n'est pas associé à une page notice, on renvoie la page sur laquelle il est
                                         fd = current_link;
                                     }
                                     if (x == 0) {
-                                        System.out.println("-------------------------------");
-                                        addNode(new_link, fd, true);
+                                        addNode(new_link, fd, true); // si le site renvoie un message d'ereur on lance addNode avec certification bonne
                                     } else if (x == 2) {
-                                        addNode(new_link, fd, false);
+                                        addNode(new_link, fd, false); // Sinon, si la certif du site est mauvaise, on lance addNode avec certification fausse
                                     }
                                 }
                             }
-                            current_link = start_url + "?query&pagination=" + cpt + "&sort=score";
+                            current_link = start_url + "?query&pagination=" + cpt + "&sort=score"; // on assigne la prochaine page aux threads
                         }
-                        System.out.println("avant le return null");
                         return null;
                     }
                 };
             }
         };
 
-        calculateLink.stateProperty().
-
-                addListener(new ChangeListener<Worker.State>() {
-
-                    @Override
-                    public void changed(ObservableValue<? extends Worker.State> observableValue, Worker.State
-                            oldValue, Worker.State newValue) {
-                        switch (newValue) {
-                            case FAILED:
-                            case CANCELLED:
-                            case SUCCEEDED:
-                                nbThreadFinish++;
-                                if (nbThreadFinish == MultiInspect.getNbThread()) {
-                                    pb = (ProgressBar) UOHinterface.root.lookup("#progBar");
-                                    pb.setVisible(false);
-                                    Button but = (Button) root.lookup("#rapport");
-                                    but.setDisable(false);
-                                }
-                        }
+        calculateLink.stateProperty().addListener((observableValue, oldValue, newValue) -> {
+            switch (newValue) {
+                case FAILED, CANCELLED, SUCCEEDED -> {
+                    nbThreadFinish++; // on compte le nombre de thread qui ont fini
+                    if (nbThreadFinish == MultiInspect.getNbThread()) {
+                        progressBar.setVisible(false); // on désactive la  bar de progression
+                        Button but = (Button) root.lookup("#rapport");
+                        but.setDisable(false); // On active le boutton pour le rapport
                     }
-                });
-        calculateLink.start();
+                }
+            }
+        });
+        calculateLink.start(); // lancement du thread de inspect
     }
+
+
 
     /**
      * addNode rajoute les liens mort dans l'interface graphique et les écrit dans le fichier
@@ -416,7 +385,8 @@ public class InspectWebLinks implements Runnable {
      * @param link2
      * @param certif
      */
-    public synchronized static void addNode(String link1, String link2, boolean certif) {
+    public synchronized static void addNode(String link1, String link2, boolean certif) { // Permet de mettre à jour l'interface graphique
+        // avec les sites qui renvoie un message d'erreur ou de certificat invalide
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -426,34 +396,29 @@ public class InspectWebLinks implements Runnable {
                 String cert1 = "Le site suivant doit être vérifié manuellement : ";
 
 
-                Hyperlink h1 = new Hyperlink(link1);
-                Hyperlink h2 = new Hyperlink(link2);
+                Hyperlink h1 = new Hyperlink(link1); // lien du site externe
+                Hyperlink h2 = new Hyperlink(link2); // lien de la notice rattaché
                 List<Hyperlink> list = new ArrayList<>();
                 list.add(h1);
                 list.add(h2);
 
                 for (final Hyperlink hyperlink : list) {
-                    hyperlink.setOnAction(new EventHandler<ActionEvent>() {
-
-                        @Override
-                        public void handle(ActionEvent t) {
-                            service.showDocument(hyperlink.getText());
-                        }
-                    });
+                    // permet d'afficher des liens clickable qui ramènent sur internet
+                    hyperlink.setOnAction(t -> service.showDocument(hyperlink.getText()));
                 }
-                if (certif) {
+
+                if (certif) { // si ce n'est pas un problème de certificat
                     try {
-                        f.write("\n" + brok1 + link1 + brok2 + link2 + "\n");
+                        f.write("\n" + brok1 + link1 + brok2 + link2 + "\n"); // on écrit dans un fichier temporaire les liens
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     text.getChildren().add(new Text(brok1 + "\n"));
                     text.getChildren().add(h1);
                     text.getChildren().add(new Text("\n" + brok2 + "\n"));
-                    text.getChildren().add(h2);
-                    System.out.println("ECRITICI---------------------------------");
-                    System.out.println(("\n" + brok1 + link1 + brok2 + link2 + "\n"));
-                } else {
+                    text.getChildren().add(h2); // on ajoute les textes et les liens à l'interface graphique
+
+                } else { // Si c'est un problème de certificat
                     try {
                         f.write("\n" + cert1 + link1 + brok2 + link2 + "\n");
                     } catch (IOException e) {
@@ -465,16 +430,15 @@ public class InspectWebLinks implements Runnable {
                     text.getChildren().add(h2);
                 }
                 text.getChildren().add(new Text("\n--------------------------------------\n"));
-
             }
         });
     }
 
     @Override
-    public synchronized void run() {
+    public synchronized void run() { // lancement des threads
         try {
             inspect(this.id);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
