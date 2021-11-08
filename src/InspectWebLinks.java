@@ -11,13 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.HostServices;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.concurrent.Worker;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -387,50 +382,47 @@ public class InspectWebLinks implements Runnable {
      */
     public synchronized static void addNode(String link1, String link2, boolean certif) { // Permet de mettre à jour l'interface graphique
         // avec les sites qui renvoie un message d'erreur ou de certificat invalide
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                HostServices service = UOHinterface.getInstance().getHostServices();
-                String brok1 = "Le site renvoie un message d'erreur ";
-                String brok2 = " sur la page : ";
-                String cert1 = "Le site suivant doit être vérifié manuellement : ";
+        Platform.runLater(() -> {
+            HostServices service = UOHinterface.getInstance().getHostServices();
+            String brok1 = "Le site renvoie un message d'erreur ";
+            String brok2 = " sur la page : ";
+            String cert1 = "Le site suivant doit être vérifié manuellement : ";
 
 
-                Hyperlink h1 = new Hyperlink(link1); // lien du site externe
-                Hyperlink h2 = new Hyperlink(link2); // lien de la notice rattaché
-                List<Hyperlink> list = new ArrayList<>();
-                list.add(h1);
-                list.add(h2);
+            Hyperlink h1 = new Hyperlink(link1); // lien du site externe
+            Hyperlink h2 = new Hyperlink(link2); // lien de la notice rattaché
+            List<Hyperlink> list = new ArrayList<>();
+            list.add(h1);
+            list.add(h2);
 
-                for (final Hyperlink hyperlink : list) {
-                    // permet d'afficher des liens clickable qui ramènent sur internet
-                    hyperlink.setOnAction(t -> service.showDocument(hyperlink.getText()));
-                }
-
-                if (certif) { // si ce n'est pas un problème de certificat
-                    try {
-                        f.write("\n" + brok1 + link1 + brok2 + link2 + "\n"); // on écrit dans un fichier temporaire les liens
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    text.getChildren().add(new Text(brok1 + "\n"));
-                    text.getChildren().add(h1);
-                    text.getChildren().add(new Text("\n" + brok2 + "\n"));
-                    text.getChildren().add(h2); // on ajoute les textes et les liens à l'interface graphique
-
-                } else { // Si c'est un problème de certificat
-                    try {
-                        f.write("\n" + cert1 + link1 + brok2 + link2 + "\n");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    text.getChildren().add(new Text(cert1 + "\n"));
-                    text.getChildren().add(h1);
-                    text.getChildren().add(new Text("\n" + brok2 + "\n"));
-                    text.getChildren().add(h2);
-                }
-                text.getChildren().add(new Text("\n--------------------------------------\n"));
+            for (final Hyperlink hyperlink : list) {
+                // permet d'afficher des liens clickable qui ramènent sur internet
+                hyperlink.setOnAction(t -> service.showDocument(hyperlink.getText()));
             }
+
+            if (certif) { // si ce n'est pas un problème de certificat
+                try {
+                    f.write("\n" + brok1 + link1 + brok2 + link2 + "\n"); // on écrit dans un fichier temporaire les liens
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                text.getChildren().add(new Text(brok1 + "\n"));
+                text.getChildren().add(h1);
+                text.getChildren().add(new Text("\n" + brok2 + "\n"));
+                text.getChildren().add(h2); // on ajoute les textes et les liens à l'interface graphique
+
+            } else { // Si c'est un problème de certificat
+                try {
+                    f.write("\n" + cert1 + link1 + brok2 + link2 + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                text.getChildren().add(new Text(cert1 + "\n"));
+                text.getChildren().add(h1);
+                text.getChildren().add(new Text("\n" + brok2 + "\n"));
+                text.getChildren().add(h2);
+            }
+            text.getChildren().add(new Text("\n--------------------------------------\n"));
         });
     }
 
