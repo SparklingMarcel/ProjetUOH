@@ -47,7 +47,7 @@
                         <RowConstraints maxHeight="169.39996948242185" minHeight="10.0" prefHeight="130.39996948242185" vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
-                                <Button fx:id="bl" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" mnemonicParsing="false" onAction="#lancer" prefHeight="40.0" prefWidth="94.0" text="Lancer">
+                                <Button fx:id="launchButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" mnemonicParsing="false" onAction="#lancer" prefHeight="40.0" prefWidth="94.0" text="Lancer">
                            <GridPane.margin>
                               <Insets top="170.0" />
                            </GridPane.margin></Button>

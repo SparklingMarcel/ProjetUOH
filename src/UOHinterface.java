@@ -33,7 +33,7 @@ public class UOHinterface extends Application {
 
         root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("sample.fxml"))); // on récupère le visuel dans le fichier sample.fxml
         progressBar = (ProgressBar) root.lookup("#progBar"); // on récupère la barre de progression
-        launchButton = (Button) root.lookup("#bl"); // On recupère le bouton de lancement
+        launchButton = (Button) root.lookup("#launchButton"); // On recupère le bouton de lancement
         checkBox = (CheckBox) root.lookup("#cert"); // On récupère le bouton de checkbox de certification
         final Tooltip tooltip = new Tooltip(); // création de la tooltip
         tooltip.setShowDelay(Duration.millis(200));
@@ -51,7 +51,7 @@ public class UOHinterface extends Application {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         stage = primaryStage ;
         System.out.println(UOHinterface.class);
-        stage.getIcons().add(new Image(UOHinterface.class.getResourceAsStream("main/logoColor-1.png"))); // ajout de l'icone
+        stage.getIcons().add(new Image(Objects.requireNonNull(UOHinterface.class.getResourceAsStream("main/logoColor-1.png")))); // ajout de l'icone
         primaryStage.setResizable(false); // on empêche l'utilisateur de changer la taille de l'application
         // quand on ferme l'application
         primaryStage.setOnCloseRequest(windowEvent -> {

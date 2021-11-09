@@ -62,8 +62,6 @@ public class InspectWebLinks implements Runnable {
      * Permet de créer et d'écrire le fichier final en fonction du choix ( txt ou CSV )
      */
     public static void writeRapport() {
-
-
         try {
             f.close();
             rap = true;
@@ -85,8 +83,6 @@ public class InspectWebLinks implements Runnable {
                 }
                 bo.close();
                 bf.close();
-
-
             } else { // Si l'utilisateur a choisi CSV
 
                 selectedFile = chooseFileType(false);
@@ -102,44 +98,31 @@ public class InspectWebLinks implements Runnable {
                 }
                 bo2.close();
                 bf2.close();
-
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private static void initCert() { // Gestion des certificats , autorisation de tous les certificats SSL uniquement pendant l'execution du programme
-        // Not relevant.
-        // Do nothing. Just allow them all.
-        // Do nothing. Just allow them all.
+
         TrustManager[] trustAllCertificates = new TrustManager[]{
                 new X509TrustManager() {
                     @Override
                     public X509Certificate[] getAcceptedIssuers() {
-                        return null; // Not relevant.
+                        return null;
                     }
 
                     @Override
                     public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        // Do nothing. Just allow them all.
                     }
 
                     @Override
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        // Do nothing. Just allow them all.
                     }
                 }
         };
-
-        // Just allow them all.
-        HostnameVerifier trustAllHostnames = (hostname, session) -> {
-            return true; // Just allow them all.
-        };
+        HostnameVerifier trustAllHostnames = (hostname, session) -> true;
 
         try {
             System.setProperty("jsse.enableSNIExtension", "false"); // On désactive la vérification des certificats par Java
@@ -387,8 +370,6 @@ public class InspectWebLinks implements Runnable {
             String brok1 = "Le site renvoie un message d'erreur ";
             String brok2 = " sur la page : ";
             String cert1 = "Le site suivant doit être vérifié manuellement : ";
-
-
             Hyperlink h1 = new Hyperlink(link1); // lien du site externe
             Hyperlink h2 = new Hyperlink(link2); // lien de la notice rattaché
             List<Hyperlink> list = new ArrayList<>();
@@ -399,7 +380,6 @@ public class InspectWebLinks implements Runnable {
                 // permet d'afficher des liens clickable qui ramènent sur internet
                 hyperlink.setOnAction(t -> service.showDocument(hyperlink.getText()));
             }
-
             if (certif) { // si ce n'est pas un problème de certificat
                 try {
                     f.write("\n" + brok1 + link1 + brok2 + link2 + "\n"); // on écrit dans un fichier temporaire les liens
@@ -410,7 +390,6 @@ public class InspectWebLinks implements Runnable {
                 text.getChildren().add(h1);
                 text.getChildren().add(new Text("\n" + brok2 + "\n"));
                 text.getChildren().add(h2); // on ajoute les textes et les liens à l'interface graphique
-
             } else { // Si c'est un problème de certificat
                 try {
                     f.write("\n" + cert1 + link1 + brok2 + link2 + "\n");
