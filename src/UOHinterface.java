@@ -50,7 +50,6 @@ public class UOHinterface extends Application {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         stage = primaryStage ;
-        System.out.println(UOHinterface.class);
         stage.getIcons().add(new Image(Objects.requireNonNull(UOHinterface.class.getResourceAsStream("main/logoColor-1.png")))); // ajout de l'icone
         primaryStage.setResizable(false); // on empêche l'utilisateur de changer la taille de l'application
         // quand on ferme l'application

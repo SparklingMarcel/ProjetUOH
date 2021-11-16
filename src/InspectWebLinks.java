@@ -7,12 +7,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -30,6 +32,8 @@ public class InspectWebLinks implements Runnable {
 
     private static final String path = System.getProperty("user.dir") + File.separator + "report.txt";
     private static final String start_url = "https://uoh.fr/front/resultatsfr/";
+    private static final String moz = "Mozilla";
+    private static final String http = "http://";
     private static boolean rap = false;
     private static FileWriter f;
     private static int nbPage = 0;
@@ -57,10 +61,10 @@ public class InspectWebLinks implements Runnable {
         launch();
     }
 
-
     /**
      * Permet de créer et d'écrire le fichier final en fonction du choix ( txt ou CSV )
      */
+
     public static void writeRapport() {
         try {
             f.close();
@@ -74,30 +78,30 @@ public class InspectWebLinks implements Runnable {
                 if (selectedFile == null) {
                     return;
                 }
-                BufferedReader bf = new BufferedReader(new FileReader(path));
-                FileWriter bo = new FileWriter(selectedFile);
-                String su;
-                //On écrit dans le fichier
-                while ((su = bf.readLine()) != null) {
-                    bo.write(su + "\n");
+                try (BufferedReader bf = new BufferedReader(new FileReader(path))) {
+                    try (FileWriter bo = new FileWriter(selectedFile)) {
+                        String su;
+                        //On écrit dans le fichier
+                        while ((su = bf.readLine()) != null) {
+                            bo.write(su + "\n");
+                        }
+                    }
                 }
-                bo.close();
-                bf.close();
             } else { // Si l'utilisateur a choisi CSV
 
                 selectedFile = chooseFileType(false);
                 if (selectedFile == null) {
                     return;
                 }
-                BufferedReader bf2 = new BufferedReader(new FileReader(path));
-                FileWriter bo2 = new FileWriter(selectedFile);
-                String su;
+                try (BufferedReader bf2 = new BufferedReader(new FileReader(path))) {
+                    try (FileWriter bo2 = new FileWriter(selectedFile)) {
+                        String su;
 
-                while ((su = bf2.readLine()) != null) {
-                    bo2.write(su + "\n");
+                        while ((su = bf2.readLine()) != null) {
+                            bo2.write(su + "\n");
+                        }
+                    }
                 }
-                bo2.close();
-                bf2.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,15 +114,18 @@ public class InspectWebLinks implements Runnable {
                 new X509TrustManager() {
                     @Override
                     public X509Certificate[] getAcceptedIssuers() {
-                        return null;
+                        return new X509Certificate[0];
                     }
 
                     @Override
                     public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        // Ne rien faire pour autoriser tous les certificats
                     }
 
                     @Override
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        // Ne rien faire pour autoriser tous les certificats
+
                     }
                 }
         };
@@ -181,7 +188,7 @@ public class InspectWebLinks implements Runnable {
     private static void getNbPage() { // récupère le nombre de page total des ressources
         Document doc = null;
         try {
-            doc = Jsoup.connect(start_url).userAgent("Mozilla").get();
+            doc = Jsoup.connect(start_url).userAgent(moz).get();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -224,7 +231,7 @@ public class InspectWebLinks implements Runnable {
         Document doc = null;
         HashMap<String, String> hm = new HashMap<>();
         try {
-            doc = Jsoup.connect(InspectWebLinks.start_url).userAgent("Mozilla").get();
+            doc = Jsoup.connect(InspectWebLinks.start_url).userAgent(moz).get();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -237,7 +244,7 @@ public class InspectWebLinks implements Runnable {
             if (m.find()) {
                 s1 = m.group().subSequence(6, m.group().length() - 1).toString();
                 if (!s1.startsWith("http")) { // si le site ne commence pas par http
-                    s1 = "http://" + s1;
+                    s1 = http + s1;
                 }
                 hm.put(s1, "");
             }
@@ -255,7 +262,7 @@ public class InspectWebLinks implements Runnable {
     private static HashMap<String, String> get_links_on_page(String url) { // Récupère les liens des cartes notice sur chaque page une par une
         Document doc = null;
         try {
-            doc = Jsoup.connect(url).userAgent("Mozilla").get();
+            doc = Jsoup.connect(url).userAgent(moz).get();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -269,12 +276,12 @@ public class InspectWebLinks implements Runnable {
             if (m.find()) { // Si on trouve un premier lien, on le récupère ( ressource externe )
                 s1 = m.group().subSequence(6, m.group().length() - 2).toString();
                 if (!s1.startsWith("http")) {
-                    s1 = "http://" + s1;
+                    s1 = http + s1;
                 }
                 if (m.find()) { // Si on trouve un deuxième lien ( le lien de la notice correspondant à la ressource )
                     s2 = m.group().subSequence(6, m.group().length() - 2).toString();
                     if (!s2.startsWith("http")) {
-                        s2 = "http://" + s2;
+                        s2 = http + s2;
                     }
                     s2 = s2.replace("?lang=fr&amp;", "/?");
 
@@ -317,10 +324,11 @@ public class InspectWebLinks implements Runnable {
                             cpt++;
                             progressBar.setProgress(((float) nbInt / nbPage)); // on fait progresser la bar de progression
                             nbInt++; // nombre de page vérifié
-                            for (String new_link : found_links.keySet()) {
+                            for (Map.Entry<String, String> links : found_links.entrySet()) {
+                                String new_link = links.getKey() ;
+                                String fd = links.getValue();
                                 if (!new_link.startsWith("https://uoh.fr")) {
                                     int x = check_link(new_link); // 2 si problème de certificat, 0 si le site renvoi un message d'erreur
-                                    String fd = found_links.get(new_link);
                                     if (fd.equals("")) { // si le site externe n'est pas associé à une page notice, on renvoie la page sur laquelle il est
                                         fd = current_link;
                                     }
@@ -340,14 +348,12 @@ public class InspectWebLinks implements Runnable {
         };
 
         calculateLink.stateProperty().addListener((observableValue, oldValue, newValue) -> {
-            switch (newValue) {
-                case FAILED, CANCELLED, SUCCEEDED -> {
-                    nbThreadFinish++; // on compte le nombre de thread qui ont fini
-                    if (nbThreadFinish == MultiInspect.getNbThread()) {
-                        progressBar.setVisible(false); // on désactive la  bar de progression
-                        Button but = (Button) root.lookup("#rapport");
-                        but.setDisable(false); // On active le boutton pour le rapport
-                    }
+            if (newValue == Worker.State.FAILED || newValue == Worker.State.CANCELLED || newValue == Worker.State.SUCCEEDED) {
+                nbThreadFinish++; // on compte le nombre de thread qui ont fini
+                if (nbThreadFinish == MultiInspect.getNbThread()) {
+                    progressBar.setVisible(false); // on désactive la  bar de progression
+                    Button but = (Button) root.lookup("#rapport");
+                    but.setDisable(false); // On active le boutton pour le rapport
                 }
             }
         });
@@ -409,8 +415,8 @@ public class InspectWebLinks implements Runnable {
     public synchronized void run() { // lancement des threads
         try {
             inspect(this.id);
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,0 +1,6 @@
+
+Le site renvoie un message d'erreur http://www.truelles-pixels.mom.fr/ sur la page : https://uoh.fr/front/noticefr/?uuid=7478dd4d-731f-4031-ac55-efc5be1840f0
+
+Le site renvoie un message d'erreur http://jalonedit.unice.fr/geo_canada/cours/2.0-le-multiculturalisme-canadien-1/2.2-la-notion-de-nordicite-au-canada-1 sur la page : https://uoh.fr/front/noticefr/?uuid=f855b3bf-4946-45ee-b702-b0db348d2000
+
+Le site renvoie un message d'erreur http://e-cours.univ-lr.fr/UNT/democratie/co/Publication_web.html sur la page : https://uoh.fr/front/noticefr/?uuid=cc1904ae-b0be-464e-86a7-7b3f8e4f9712
