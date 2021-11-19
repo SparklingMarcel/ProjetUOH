@@ -26,8 +26,6 @@ import org.jsoup.select.Elements;
 import src.main.MultiInspect;
 import javax.net.ssl.*;
 
-import static src.UOHinterface.*;
-
 public class InspectWebLinks implements Runnable {
 
     private static final String path = System.getProperty("user.dir") + File.separator + "report.txt";
@@ -70,7 +68,7 @@ public class InspectWebLinks implements Runnable {
             f.close();
             rap = true;
             // Création du radio button
-            RadioButton s = (RadioButton) root.lookup("#texte");
+            RadioButton s = Controller.getInstance().getTexte();
             File selectedFile;
             // On regarde quel est le type choisi par l'user avec isSelected()
             if (s.isSelected()) { // Si l'utilisateur a choisi TXT
@@ -160,7 +158,7 @@ public class InspectWebLinks implements Runnable {
 
         chooser.getExtensionFilters().add(extFilter);
 
-        return chooser.showSaveDialog(stage); // Affichage de la fenêtre pour choisir le répertoire de création du fichier
+        return chooser.showSaveDialog(null); // Affichage de la fenêtre pour choisir le répertoire de création du fichier
     }
 
     /**
@@ -168,11 +166,10 @@ public class InspectWebLinks implements Runnable {
      */
     public static void launch() {
         try {
-            if (checkBox.isSelected()) { // Si le bouton de gestion des certificats est coché
+            if (Controller.getInstance().checkCheck()) { // Si le bouton de gestion des certificats est coché
                 initCert();
             }
-            checkBox.setDisable(true);
-            launchButton.setDisable(true);
+
             f = new FileWriter(path);
             getNbPage();
             MultiInspect.main();
@@ -322,7 +319,7 @@ public class InspectWebLinks implements Runnable {
                                 found_links.putAll(get_links_bottom_once()); // on donne au premier thread les liens en bas de page ( une fois seulement )
                             }
                             cpt++;
-                            progressBar.setProgress(((float) nbInt / nbPage)); // on fait progresser la bar de progression
+                            Controller.getInstance().setProgBar((float) nbInt / nbPage); // on fait progresser la bar de progression
                             nbInt++; // nombre de page vérifié
                             for (Map.Entry<String, String> links : found_links.entrySet()) {
                                 String new_link = links.getKey() ;
@@ -333,9 +330,9 @@ public class InspectWebLinks implements Runnable {
                                         fd = current_link;
                                     }
                                     if (x == 0) {
-                                        addNode(new_link, fd, true); // si le site renvoie un message d'ereur on lance addNode avec certification bonne
+                                        Controller.getInstance().addNode(new_link, fd, true); // si le site renvoie un message d'ereur on lance addNode avec certification bonne
                                     } else if (x == 2) {
-                                        addNode(new_link, fd, false); // Sinon, si la certif du site est mauvaise, on lance addNode avec certification fausse
+                                        Controller.getInstance().addNode(new_link, fd, false); // Sinon, si la certif du site est mauvaise, on lance addNode avec certification fausse
                                     }
                                 }
                             }
@@ -351,9 +348,8 @@ public class InspectWebLinks implements Runnable {
             if (newValue == Worker.State.FAILED || newValue == Worker.State.CANCELLED || newValue == Worker.State.SUCCEEDED) {
                 nbThreadFinish++; // on compte le nombre de thread qui ont fini
                 if (nbThreadFinish == MultiInspect.getNbThread()) {
-                    progressBar.setVisible(false); // on désactive la  bar de progression
-                    Button but = (Button) root.lookup("#rapport");
-                    but.setDisable(false); // On active le boutton pour le rapport
+                    Controller.getInstance().getProgBar().setVisible(false); // on désactive la  bar de progression
+                    Controller.getInstance().getRapport().setDisable(false); // On active le boutton pour le rapport
                 }
             }
         });
@@ -362,54 +358,8 @@ public class InspectWebLinks implements Runnable {
 
 
 
-    /**
-     * addNode rajoute les liens mort dans l'interface graphique et les écrit dans le fichier
-     *
-     * @param link1
-     * @param link2
-     * @param certif
-     */
-    public synchronized static void addNode(String link1, String link2, boolean certif) { // Permet de mettre à jour l'interface graphique
-        // avec les sites qui renvoie un message d'erreur ou de certificat invalide
-        Platform.runLater(() -> {
-            HostServices service = UOHinterface.getInstance().getHostServices();
-            String brok1 = "Le site renvoie un message d'erreur ";
-            String brok2 = " sur la page : ";
-            String cert1 = "Le site suivant doit être vérifié manuellement : ";
-            Hyperlink h1 = new Hyperlink(link1); // lien du site externe
-            Hyperlink h2 = new Hyperlink(link2); // lien de la notice rattaché
-            List<Hyperlink> list = new ArrayList<>();
-            list.add(h1);
-            list.add(h2);
 
-            for (final Hyperlink hyperlink : list) {
-                // permet d'afficher des liens clickable qui ramènent sur internet
-                hyperlink.setOnAction(t -> service.showDocument(hyperlink.getText()));
-            }
-            if (certif) { // si ce n'est pas un problème de certificat
-                try {
-                    f.write("\n" + brok1 + link1 + brok2 + link2 + "\n"); // on écrit dans un fichier temporaire les liens
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                text.getChildren().add(new Text(brok1 + "\n"));
-                text.getChildren().add(h1);
-                text.getChildren().add(new Text("\n" + brok2 + "\n"));
-                text.getChildren().add(h2); // on ajoute les textes et les liens à l'interface graphique
-            } else { // Si c'est un problème de certificat
-                try {
-                    f.write("\n" + cert1 + link1 + brok2 + link2 + "\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                text.getChildren().add(new Text(cert1 + "\n"));
-                text.getChildren().add(h1);
-                text.getChildren().add(new Text("\n" + brok2 + "\n"));
-                text.getChildren().add(h2);
-            }
-            text.getChildren().add(new Text("\n--------------------------------------\n"));
-        });
-    }
+
 
     @Override
     public synchronized void run() { // lancement des threads

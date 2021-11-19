@@ -27,7 +27,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <ScrollPane fx:id="myTxtID" fitToWidth="true" pannable="true" prefHeight="601.0" prefWidth="595.0" scaleZ="3.0" vbarPolicy="ALWAYS" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER">
+                        <ScrollPane fx:id="scrollPane" fitToWidth="true" pannable="true" prefHeight="601.0" prefWidth="595.0" scaleZ="3.0" vbarPolicy="ALWAYS" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER">
                             <GridPane.margin>
                                 <Insets right="100.0" />
                             </GridPane.margin>
